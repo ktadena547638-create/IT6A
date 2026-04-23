@@ -28,6 +28,11 @@
                 <a href="{{ route('tasks.edit', $task) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                     Edit
                 </a>
+            @elseif($task->assigned_user_id === auth()->id())
+                {{-- Soldier's Oath: Team members can update status --}}
+                <a href="{{ route('tasks.edit', $task) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                    Update Status
+                </a>
             @endcan
             @can('delete', $task)
                 <form method="POST" action="{{ route('tasks.destroy', $task) }}" style="display:inline" 

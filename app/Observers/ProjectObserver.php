@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\ProjectMilestone;
 use App\Models\Project;
 use App\Models\TaskActivity;
 
@@ -40,7 +41,7 @@ class ProjectObserver
 
     /**
      * Handle the Project "updated" event.
-     * Log project update activity for audit trail
+     * Log project update activity for audit trail + Dispatch milestone event if client assigned
      */
     public function updated(Project $project): void
     {
@@ -66,6 +67,11 @@ class ProjectObserver
                     'changed_fields' => $changedFields,
                 ]),
             ]);
+
+            // ✅ PROJECT MILESTONE: Dispatch event if client was just assigned
+            if ($project->wasChanged('client_id') && $project->client_id) {
+                ProjectMilestone::dispatch($project);
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Failed to log project update activity', [
                 'project_id' => $project->id,

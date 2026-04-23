@@ -11,6 +11,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,9 +55,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('projects')->name('projects.')->group(function () {
         Route::get('/', [ProjectController::class, 'index'])->name('index');
         
-        // Create/Store - Admins and Project Managers only
-        // ✅ HARDENED: Added rate limiting to prevent spam/DoS
-        Route::middleware(['checkRole:admin,project_manager', 'throttle:100,1'])->group(function () {
+        // Create/Store - Admin ONLY (The Sovereign forges Projects)
+        // ✅ HIERARCHICAL: Only the sovereign (Admin) can create new Projects
+        Route::middleware(['checkRole:admin', 'throttle:100,1'])->group(function () {
             Route::get('/create', [ProjectController::class, 'create'])->name('create');
             Route::post('/', [ProjectController::class, 'store'])->name('store');
         });
@@ -77,6 +79,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Task management routes (full resource with custom actions)
     Route::prefix('tasks')->name('tasks.')->group(function () {
         Route::get('/', [TaskController::class, 'index'])->name('index');
+        
+        // Kanban board view
+        Route::get('/projects/{project}/kanban', [TaskController::class, 'kanban'])->name('kanban');
+        Route::patch('/{task}/status', [TaskController::class, 'updateStatus'])->name('update-status');
         
         // Create/Store - Admins and Project Managers only
         // ✅ HARDENED: Added rate limiting to prevent spam/DoS
@@ -122,6 +128,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Global search
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 
+    // Profile & preferences
+    Route::get('/profile/preferences', function () {
+        return view('profile.preferences');
+    })->name('profile.preferences');
+    Route::patch('/profile/update-theme', function (\Illuminate\Http\Request $request) {
+        auth()->user()->update(['theme_preference' => $request->theme_preference]);
+        return redirect()->route('profile.preferences')->with('success', 'Theme updated successfully');
+    })->name('profile.update-theme');
+
     // Reports and analytics (admin/manager only)
     Route::middleware('checkRole:admin,project_manager')->prefix('reports')->name('reports.')->group(function () {
         Route::get('/tasks', [ReportController::class, 'tasks'])->name('tasks');
@@ -136,16 +151,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/completion-trend', [AnalyticsController::class, 'completionTrendData'])->name('completion-trend');
     });
 
-    // Admin routes (admin only)
-    Route::middleware('checkRole:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/users', function () {
-            return view('admin.users.index');
-        })->name('users.index');
+    // Admin routes - User Management (admin only)
+    // ✅ SOVEREIGN'S DECREE: Only admins can manage users
+    Route::middleware('checkRole:admin')->group(function () {
+        Route::resource('users', UserController::class);
         
-        Route::put('/users/{user}/role', function (\App\Models\User $user) {
-            $user->update(['role' => request('role')]);
-            return redirect()->back()->with('success', 'User role updated successfully.');
-        })->name('users.update-role');
+        // Audit logs (admin only)
+        Route::get('/audit-logs', [UserController::class, 'auditLogs'])->name('audit-logs');
+    });
+
+    // Client routes (clients only)
+    // ✅ SELECTIVE SCRYING: Clients can only see their own projects
+    Route::middleware('checkRole:client')->prefix('client')->name('client.')->group(function () {
+        Route::get('/dashboard', [ClientController::class, 'dashboard'])->name('dashboard');
+        Route::get('/projects/{project}', [ClientController::class, 'viewProject'])->name('project');
+        Route::get('/projects/{project}/tasks', [ClientController::class, 'viewProjectTasks'])->name('project-tasks');
     });
 
     // Logout

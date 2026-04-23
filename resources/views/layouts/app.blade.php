@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }" :class="darkMode ? 'dark' : ''">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +11,20 @@
     <style>
         * { font-family: 'Inter', sans-serif; }
     </style>
+    <script>
+        function initTheme() {
+            const userTheme = '{{ auth()->user()->theme_preference ?? 'light' }}';
+            const isDark = userTheme === 'dark' || (userTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        initTheme();
+    </script>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 dark:bg-slate-900">
     <div class="flex h-screen bg-slate-50">
         <!-- Sidebar -->
         <aside class="w-64 bg-slate-900 text-white shadow-lg flex flex-col">
@@ -70,14 +82,26 @@
                 </a>
                 @endif
 
-                <!-- Users (Admin Only) -->
+                <!-- User Management (Admin Only) -->
                 @if(auth()->user()->isAdmin())
-                <a href="{{ route('admin.users.index') }}" 
-                   class="flex items-center px-4 py-3 rounded-lg {{ request()->routeIs('admin.users.*') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800' }} transition">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('users.index') }}" 
+                   class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('users.*') ? 'bg-indigo-700 text-white' : 'text-slate-300 hover:bg-slate-800' }} transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048M12 4.354a4 4 0 110 8.048M12 4.354a4 4 0 110 8.048M3.172 15.172a8 8 0 1116 0M9 10h.01M15 10h.01"></path>
                     </svg>
-                    Users
+                    User Management
+                </a>
+                @endif
+
+                <!-- Project Management (Client Only) -->
+                @if(auth()->user()->role === 'client')
+                <a href="{{ route('client.dashboard') }}" 
+                   class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('client.*') ? 'bg-indigo-700 text-white' : 'text-slate-300 hover:bg-slate-800' }} transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    Project Management
                 </a>
                 @endif
             </nav>
@@ -93,6 +117,9 @@
                         <span class="text-white font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
                     </div>
                 </div>
+                <a href="{{ route('profile.preferences') }}" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded transition block mb-2">
+                    🎨 Preferences
+                </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded transition">
@@ -105,9 +132,9 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Navigation Bar -->
-            <header class="bg-white shadow-sm border-b border-slate-200">
+            <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
                 <div class="px-8 py-4 flex items-center justify-between gap-4">
-                    <h2 class="text-xl font-semibold text-slate-900">@yield('page-title', 'Dashboard')</h2>
+                    <h2 class="text-xl font-semibold text-slate-900 dark:text-white">@yield('page-title', 'Dashboard')</h2>
                     
                     <!-- Quick Actions -->
                     <div class="flex items-center space-x-4">
@@ -207,12 +234,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                                 </svg>
                             </button>
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg hidden group-hover:block z-50">
-                                <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-t-lg">Profile</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Settings</a>
-                                <form method="POST" action="{{ route('logout') }}" class="border-t">
+                            <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg hidden group-hover:block z-50">
+                                <a href="{{ route('profile.preferences') }}" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-t-lg transition">🎨 Preferences</a>
+                                <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-200 dark:border-slate-700">
                                     @csrf
-                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100 rounded-b-lg">
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-b-lg transition">
                                         Logout
                                     </button>
                                 </form>

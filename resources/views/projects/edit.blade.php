@@ -51,12 +51,14 @@
                 <select id="manager_id" name="manager_id" required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('manager_id') border-red-500 @enderror">
                     <option value="">-- Select Project Manager --</option>
-                    @foreach($users as $user)
-                        <option value="{{ $user->id }}" 
-                                {{ old('manager_id', $project->manager_id) == $user->id ? 'selected' : '' }}>
-                            {{ $user->name }} ({{ ucfirst(str_replace('_', ' ', $user->role)) }})
+                    @forelse($managers as $manager)
+                        <option value="{{ $manager->id }}" 
+                                {{ old('manager_id', $project->manager_id) == $manager->id ? 'selected' : '' }}>
+                            {{ $manager->name }}
                         </option>
-                    @endforeach
+                    @empty
+                        <option value="" disabled>No project managers available</option>
+                    @endforelse
                 </select>
                 @error('manager_id')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

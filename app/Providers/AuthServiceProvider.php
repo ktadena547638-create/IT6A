@@ -9,6 +9,7 @@ use App\Models\TaskComment;
 use App\Policies\TaskPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\TaskCommentPolicy;
+use App\Policies\UserPolicy;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -23,6 +24,7 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         Project::class => ProjectPolicy::class,
         TaskComment::class => TaskCommentPolicy::class,
+        User::class => UserPolicy::class,
     ];
 
     /**

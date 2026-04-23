@@ -92,20 +92,13 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    @if($project->tasks_count > 0)
-                                        <div class="flex-1">
-                                            <x-progress-bar :value="$project->progress ?? 0" class="w-32" />
-                                        </div>
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                                            {{ $project->progress ?? 0 }}%
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
-                                            —
-                                        </span>
-                                    @endif
-                                </div>
+                                @if($project->tasks_count > 0)
+                                    <div class="w-32">
+                                        <x-progress-bar :value="$project->progress ?? 0" />
+                                    </div>
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600">
                                 @if($project->due_date)

@@ -87,10 +87,8 @@ class TaskController extends Controller
                 ? Project::select(['id', 'name', 'manager_id'])
                 : Project::where('manager_id', auth()->id())->select(['id', 'name', 'manager_id']);
             $projects = $projectsQuery->get();
-            // Users available for assignment (Admins can assign to anyone)
-            $users = auth()->user()->isAdmin() 
-                ? User::select(['id', 'name'])->get()
-                : User::whereIn('role', ['user', 'project_manager'])->select(['id', 'name'])->get();
+            // ✅ SELECTIVE SCRYING: Only Team Members appear in assignment dropdown
+            $users = User::where('role', 'team_member')->select(['id', 'name'])->get();
             return view('tasks.create', compact('projects', 'users'));
         } catch (Exception $e) {
             Log::error('Failed to load task creation form', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -158,17 +156,35 @@ class TaskController extends Controller
 
     /**
      * Show the form for editing the task
+     * ✅ SOLDIER'S OATH: Team members can see edit form to update status only
+     * ✅ GENERAL'S MANDATE: Managers can edit all task details
+     * ✅ SELECTIVE SCRYING: Only Team Members appear in assignment dropdown
      */
     public function edit(Task $task): View
     {
         try {
-            Gate::authorize('update', $task);
+            // Load project relationship for authorization checks
+            if (!$task->relationLoaded('project')) {
+                $task->load('project');
+            }
+
+            // Team members can only edit if assigned; others need update permission
+            if (auth()->user()->isTeamMember()) {
+                if (auth()->id() !== $task->assigned_user_id) {
+                    abort(403, 'You can only update tasks assigned to you.');
+                }
+            } else {
+                Gate::authorize('update', $task);
+            }
+
             // Admins see all projects; non-admins see only their managed projects
             $projectsQuery = auth()->user()->isAdmin() 
                 ? Project::select(['id', 'name', 'manager_id'])
                 : Project::where('manager_id', auth()->id())->select(['id', 'name', 'manager_id']);
             $projects = $projectsQuery->get();
-            return view('tasks.edit', compact('task', 'projects'));
+            // ✅ SELECTIVE SCRYING: Only Team Members appear in assignment dropdown
+            $users = User::where('role', 'team_member')->select(['id', 'name'])->get();
+            return view('tasks.edit', compact('task', 'projects', 'users'));
         } catch (Exception $e) {
             Log::error('Failed to load task edit form', ['task_id' => $task->id, 'error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Failed to load task for editing');
@@ -178,11 +194,27 @@ class TaskController extends Controller
     /**
      * Update the specified task
      * ✅ HARDENED: DB::transaction() wrapper + granular error handling
+     * ✅ SOLDIER'S OATH: Team members can only update status of assigned tasks
+     * ✅ GENERAL'S MANDATE: Managers can update all tasks in their projects
      */
     public function update(UpdateTaskRequest $request, Task $task): RedirectResponse | JsonResponse
     {
         try {
-            Gate::authorize('update', $task);
+            // Load project relationship for authorization checks
+            if (!$task->relationLoaded('project')) {
+                $task->load('project');
+            }
+
+            // Check if this is a status-only update (from inline switcher)
+            $isStatusOnlyUpdate = count($request->validated()) === 1 && isset($request->validated()['status']);
+
+            if ($isStatusOnlyUpdate) {
+                // Team members can update status of tasks assigned to them
+                Gate::authorize('updateStatus', $task);
+            } else {
+                // Full updates require edit permission (managers/admins)
+                Gate::authorize('update', $task);
+            }
             
             DB::transaction(function () use ($request, $task) {
                 $this->taskService->updateTask($task->id, $request->validated());
@@ -308,6 +340,54 @@ class TaskController extends Controller
         } catch (Exception $e) {
             Log::error('Failed to retrieve overdue tasks', ['error' => $e->getMessage()]);
             return view('tasks.overdue', ['tasks' => []]);
+        }
+    }
+
+    /**
+     * Display Kanban board for a project
+     */
+    public function kanban(Project $project): View
+    {
+        try {
+            Gate::authorize('view', $project);
+
+            $tasks = Task::where('project_id', $project->id)
+                ->with(['assignedUser:id,name', 'creator:id,name'])
+                ->get()
+                ->map(function ($task) {
+                    return [
+                        'id' => $task->id,
+                        'title' => $task->title,
+                        'description' => \Str::limit($task->description, 100),
+                        'status' => $task->status,
+                        'priority' => $task->priority,
+                        'assigned_user' => $task->assignedUser?->name ?? 'Unassigned',
+                        'estimated_hours' => $task->estimated_hours,
+                    ];
+                });
+
+            return view('tasks.kanban', compact('project', 'tasks'));
+        } catch (Exception $e) {
+            Log::error('Kanban board failed', ['project_id' => $project->id, 'error' => $e->getMessage()]);
+            return redirect()->route('projects.show', $project)->with('error', 'Failed to load kanban board');
+        }
+    }
+
+    /**
+     * Update task status (for Kanban drag-and-drop)
+     */
+    public function updateStatus(Task $task, Request $request): JsonResponse
+    {
+        try {
+            Gate::authorize('update', $task);
+
+            $validated = $request->validate(['status' => 'required|in:pending,in_progress,completed']);
+            $this->taskService->updateTask($task->id, $validated);
+
+            return response()->json(['success' => true, 'message' => 'Task status updated']);
+        } catch (Exception $e) {
+            Log::error('Task status update failed', ['task_id' => $task->id, 'error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update task'], 500);
         }
     }
 }

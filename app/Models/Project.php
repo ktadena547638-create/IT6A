@@ -16,6 +16,7 @@ class Project extends Model
         'name',
         'description',
         'manager_id',
+        'client_id',
         'status',
         'priority',
         'start_date',
@@ -35,6 +36,15 @@ class Project extends Model
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    /**
+     * Project is owned by a client (optional)
+     * ✅ SELECTIVE SCRYING: Clients can see only their projects
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'client_id');
     }
 
     /**

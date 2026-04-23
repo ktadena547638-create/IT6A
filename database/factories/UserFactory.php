@@ -65,6 +65,16 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the user is a client.
+     */
+    public function client(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'client',
+        ]);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

@@ -82,12 +82,15 @@ class ProjectController extends Controller
 
     /**
      * Show the form for creating a new project
+     * ✅ SELECTIVE SCRYING: Only Project Managers appear in dropdown
      */
     public function create(): View
     {
         try {
             Gate::authorize('create', Project::class);
-            return view('projects.create');
+            // Filter to only show Project Managers (not admins, not team members)
+            $managers = User::where('role', 'project_manager')->get();
+            return view('projects.create', compact('managers'));
         } catch (Exception $e) {
             Log::error('Failed to load project creation form', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Failed to load project creation form');
@@ -104,7 +107,10 @@ class ProjectController extends Controller
             Gate::authorize('create', Project::class);
 
             $projectData = $request->validated();
-            $projectData['manager_id'] = auth()->id();
+            // Admin can assign to any manager via form; non-admins (soon to be disabled) would use their own ID
+            if (!isset($projectData['manager_id']) || empty($projectData['manager_id'])) {
+                $projectData['manager_id'] = auth()->id();
+            }
 
             Log::info('Creating project', [
                 'user_id' => auth()->id(),
@@ -172,12 +178,12 @@ class ProjectController extends Controller
         try {
             Gate::authorize('update', $project);
             
-            // Fetch all non-admin users for manager delegation (admin only)
-            $users = User::where('role', '!=', 'admin')
+            // ✅ SELECTIVE SCRYING: Only Project Managers appear in manager delegation dropdown
+            $managers = User::where('role', 'project_manager')
                 ->orderBy('name')
-                ->get(['id', 'name', 'role']);
+                ->get(['id', 'name']);
             
-            return view('projects.edit', compact('project', 'users'));
+            return view('projects.edit', compact('project', 'managers'));
         } catch (Exception $e) {
             Log::error('Failed to load project edit form', ['project_id' => $project->id, 'error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Failed to load project for editing');

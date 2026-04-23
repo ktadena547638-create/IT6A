@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Events\TaskCreated;
+use App\Events\TaskUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,10 +22,20 @@ class Task extends Model
         'assigned_user_id',
         'created_by',
         'due_date',
+        'estimated_hours',
     ];
 
     protected $casts = [
         'due_date' => 'datetime',
+    ];
+
+    /**
+     * ✅ EVENT DISPATCH: Fire events when tasks are created or updated
+     * Triggers notification listeners automatically
+     */
+    protected $dispatchesEvents = [
+        'created' => TaskCreated::class,
+        'updated' => TaskUpdated::class,
     ];
 
     /**

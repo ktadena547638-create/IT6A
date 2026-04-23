@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'theme_preference',
     ];
 
     /**
@@ -73,10 +74,44 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is client
+     */
+    public function isClient(): bool
+    {
+        return $this->role === 'client';
+    }
+
+    /**
      * Check if user has a specific role
      */
     public function hasRole($role): bool
     {
         return $this->role === $role;
+    }
+
+    // ✅ RELATIONSHIPS FOR ROLE-BASED ACCESS
+
+    /**
+     * Projects managed by this user (for Project Managers)
+     */
+    public function managedProjects()
+    {
+        return $this->hasMany(Project::class, 'manager_id', 'id');
+    }
+
+    /**
+     * Projects owned by this client (for Clients)
+     */
+    public function clientProjects()
+    {
+        return $this->hasMany(Project::class, 'client_id', 'id');
+    }
+
+    /**
+     * Tasks assigned to this user (for Team Members)
+     */
+    public function assignedTasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id', 'id');
     }
 }

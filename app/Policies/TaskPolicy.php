@@ -119,6 +119,7 @@ class TaskPolicy
     /**
      * Determine whether the user can complete the task.
      * ✅ ADMIN BYPASS + Assigned user logic
+     * Team Members can only update the status of tasks assigned to them.
      */
     public function complete(User $user, Task $task): bool
     {
@@ -128,5 +129,31 @@ class TaskPolicy
         }
         
         return $user->id === $task->assigned_user_id;
+    }
+
+    /**
+     * Determine whether the user can update task status.
+     * ✅ SOLDIER'S OATH: Team Members can only update status of their assigned tasks
+     * Managers can update status of tasks in their projects
+     * Admins bypass all checks
+     */
+    public function updateStatus(User $user, Task $task): bool
+    {
+        // Admins can update any task status
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Assigned team member can update their own task status
+        if ($user->id === $task->assigned_user_id && $user->isTeamMember()) {
+            return true;
+        }
+
+        // Project manager can update task status in their projects
+        if (!$task->relationLoaded('project')) {
+            $task->load('project');
+        }
+
+        return $task->project && $user->id === $task->project->manager_id;
     }
 }

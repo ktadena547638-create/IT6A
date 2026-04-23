@@ -44,11 +44,12 @@ class ProjectPolicy
 
     /**
      * Determine whether the user can create projects.
-     * ✅ ADMIN BYPASS + Project managers
+     * ✅ SOVEREIGN'S DECREE: Only Admin can forge new Projects
+     * Project Managers cannot create projects; they can only lead those assigned to them.
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isProjectManager();
+        return $user->isAdmin();  // ONLY the Sovereign (Admin) can forge Projects
     }
 
     /**
