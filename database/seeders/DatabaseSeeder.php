@@ -23,68 +23,68 @@ class DatabaseSeeder extends Seeder
     {
         // ====== CREATE USERS ======
 
-        // 1 Admin - The Sovereign
+        // 1 Admin
         $admin = User::factory()
             ->admin()
             ->create([
-                'name' => 'Admin Sovereign',
-                'email' => 'admin@taskflow.local',
+                'name' => 'Admin',
+                'email' => 'admin',
                 'password' => bcrypt('password'),
             ]);
 
-        // 3 Project Managers - The Generals
+        // 3 Project Managers
         $pm1 = User::factory()
             ->projectManager()
             ->create([
-                'name' => 'Sarah Johnson',
-                'email' => 'sarah.johnson@taskflow.local',
+                'name' => 'Sarah',
+                'email' => 'sarah',
                 'password' => bcrypt('password'),
             ]);
 
         $pm2 = User::factory()
             ->projectManager()
             ->create([
-                'name' => 'Michael Chen',
-                'email' => 'michael.chen@taskflow.local',
+                'name' => 'Michael',
+                'email' => 'michael',
                 'password' => bcrypt('password'),
             ]);
 
         $pm3 = User::factory()
             ->projectManager()
             ->create([
-                'name' => 'Emma Rodriguez',
-                'email' => 'emma.rodriguez@taskflow.local',
+                'name' => 'Emma',
+                'email' => 'emma',
                 'password' => bcrypt('password'),
             ]);
 
-        // 10 Team Members - The Soldiers
+        // 10 Team Members
         $teamMembers = collect([
-            User::factory()->teamMember()->create(['name' => 'Alex Thompson', 'email' => 'alex.thompson@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'Jessica Lee', 'email' => 'jessica.lee@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'David Martinez', 'email' => 'david.martinez@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'Lisa Wang', 'email' => 'lisa.wang@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'James Wilson', 'email' => 'james.wilson@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'Nicole Brown', 'email' => 'nicole.brown@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'Robert Kim', 'email' => 'robert.kim@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'Angela Davis', 'email' => 'angela.davis@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'Marcus Green', 'email' => 'marcus.green@taskflow.local', 'password' => bcrypt('password')]),
-            User::factory()->teamMember()->create(['name' => 'Rachel White', 'email' => 'rachel.white@taskflow.local', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Alex', 'email' => 'alex', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Jessica', 'email' => 'jessica', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'David', 'email' => 'david', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Lisa', 'email' => 'lisa', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'James', 'email' => 'james', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Nicole', 'email' => 'nicole', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Robert', 'email' => 'robert', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Angela', 'email' => 'angela', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Marcus', 'email' => 'marcus', 'password' => bcrypt('password')]),
+            User::factory()->teamMember()->create(['name' => 'Rachel', 'email' => 'rachel', 'password' => bcrypt('password')]),
         ]);
 
-        // 2 Clients - The Stakeholders
+        // 2 Clients
         $client1 = User::factory()
             ->client()
             ->create([
-                'name' => 'TechCorp Inc.',
-                'email' => 'contact@techcorp.local',
+                'name' => 'TechCorp',
+                'email' => 'techcorp',
                 'password' => bcrypt('password'),
             ]);
 
         $client2 = User::factory()
             ->client()
             ->create([
-                'name' => 'Digital Solutions LLC',
-                'email' => 'contact@digitalsolutions.local',
+                'name' => 'Solutions',
+                'email' => 'solutions',
                 'password' => bcrypt('password'),
             ]);
 
