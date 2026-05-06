@@ -21,17 +21,27 @@ class AuthController extends Controller
 
     /**
      * Handle login with rate limiting protection
-     * ✅ HARDENED: Added email verification requirement
+     * ✅ SUPPORTS: Both email and simple username (admin, sarah, alex, etc.)
      */
     public function handleLogin(Request $request): RedirectResponse
     {
         // ✅ SECURITY: Rate limit login attempts to prevent brute force
         $this->ensureIsNotRateLimited($request);
 
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        // Validate input - accept both email format and simple usernames
+        $input = $request->validate([
+            'email' => ['required', 'string'],
             'password' => ['required'],
         ]);
+
+        // Determine if input is email or username
+        $loginField = filter_var($input['email'], FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        
+        // Attempt login with either email or username
+        $credentials = [
+            $loginField => $input['email'],
+            'password' => $input['password'],
+        ];
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
@@ -52,7 +62,7 @@ class AuthController extends Controller
             // Clear rate limit counter on successful login
             RateLimiter::clear($this->throttleKey($request));
             
-            return redirect()->route('dashboard.index');
+            return redirect()->route('home.index');
         }
 
         // Track failed attempt
