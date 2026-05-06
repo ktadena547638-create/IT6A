@@ -18,7 +18,7 @@ class UserController extends Controller
     /**
      * Display a listing of all users (Admin only)
      * ✅ SOVEREIGN'S DECREE: Only admins can access user management
-     * ✅ OPTIMIZED: Eager load relationships, order by role hierarchy
+     * ✅ OPTIMIZED: Eager load relationships + count assignments, order by role hierarchy
      */
     public function index(): View|RedirectResponse
     {
@@ -26,7 +26,11 @@ class UserController extends Controller
             Gate::authorize('viewAny', User::class);
             
             $users = User::query()
-                ->with(['managedProjects:id,name,manager_id', 'clientProjects:id,name,client_id', 'assignedTasks:id,title,assigned_user_id'])
+                ->withCount([
+                    'managedProjects',
+                    'clientProjects', 
+                    'assignedTasks'
+                ])
                 ->orderByRaw("FIELD(role, 'admin', 'project_manager', 'team_member', 'client')")
                 ->orderBy('name', 'asc')
                 ->paginate(20);
