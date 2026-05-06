@@ -66,6 +66,7 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the user is a client.
+     * ✅ Valid ENUM: 'client' is supported in users table role column
      */
     public function client(): static
     {

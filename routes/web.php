@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskCommentController;
@@ -28,7 +29,7 @@ use App\Http\Controllers\ClientController;
 // Public routes
 Route::get('/', function () {
     if (auth()->check()) {
-        return redirect()->route('dashboard.index');
+        return redirect()->route('home.index');
     }
     return view('welcome');
 })->name('home');
@@ -43,6 +44,9 @@ Route::middleware('guest')->group(function () {
 // Protected routes - requires authentication + email verification
 // ✅ HARDENED: Enforced 'verified' middleware to prevent unverified users
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Home Command Center
+    Route::get('/home', [HomeController::class, 'index'])->name('home.index');
 
     // Dashboard routes
     Route::prefix('dashboard')->name('dashboard.')->group(function () {

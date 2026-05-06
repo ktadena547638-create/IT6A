@@ -26,12 +26,13 @@ class CalculateCapacityHeatmap implements ShouldQueue
     /**
      * Calculate and cache capacity heatmap for projects
      * Pre-calculation ensures <250ms response time
+     * ✅ OPTIMIZED: Limit to 100 most recent projects to prevent unbounded O(n) operations
      */
     public function handle(): void
     {
         $projects = $this->projectId
             ? Project::find([$this->projectId])
-            : Project::all();
+            : Project::orderBy('updated_at', 'desc')->limit(100)->get();
 
         foreach ($projects as $project) {
             $heatmap = $this->buildHeatmap($project);

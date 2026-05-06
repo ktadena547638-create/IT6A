@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('task_id')->constrained('tasks')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('activity_type', ['created', 'status_changed', 'priority_changed', 'assigned', 'reopened', 'commented', 'due_date_changed'])->index();
+            $table->enum('activity_type', ['created', 'status_changed', 'priority_changed', 'assigned', 'reopened', 'commented', 'due_date_changed']);
             $table->text('description')->nullable();
             $table->timestamp('activity_date')->useCurrent();
             $table->timestamps();

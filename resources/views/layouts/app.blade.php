@@ -29,18 +29,27 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-slate-900 text-white shadow-lg flex flex-col">
             <!-- Logo -->
-            <div class="px-6 py-8 border-b border-slate-800">
+            <a href="{{ route('home.index') }}" class="px-6 py-8 border-b border-slate-800 hover:bg-slate-800 transition">
                 <h1 class="text-2xl font-bold text-indigo-400">TaskFlow</h1>
                 <p class="text-sm text-slate-400 mt-1">Productivity Hub</p>
-            </div>
+            </a>
 
             <!-- Navigation -->
             <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <!-- Home Command Center -->
+                <a href="{{ route('home.index') }}" 
+                   class="flex items-center px-4 py-3 rounded-lg {{ request()->routeIs('home.index') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800' }} transition font-medium">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 9l4-4"></path>
+                    </svg>
+                    Home
+                </a>
+
                 <!-- Dashboard -->
                 <a href="{{ route('dashboard.index') }}" 
                    class="flex items-center px-4 py-3 rounded-lg {{ request()->routeIs('dashboard.index') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800' }} transition">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 9l4-4"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                     Dashboard
                 </a>

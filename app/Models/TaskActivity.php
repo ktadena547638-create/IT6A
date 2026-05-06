@@ -13,8 +13,9 @@ class TaskActivity extends Model
     protected $fillable = [
         'task_id',
         'user_id',
-        'action',
+        'activity_type',
         'description',
+        'activity_date',
     ];
 
     /**
