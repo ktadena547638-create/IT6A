@@ -42,97 +42,103 @@
         </form>
     </div>
 
-    {{-- Projects Table --}}
+    {{-- Projects Table with Modern Design --}}
     @if($projects->count() > 0)
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manager</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tasks</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    @foreach($projects as $project)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4">
-                                <a href="{{ route('projects.show', $project) }}" class="text-blue-600 hover:text-blue-900 font-medium">
-                                    {{ $project->name }}
-                                </a>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">
-                                {{ $project->manager?->name ?? 'Unassigned' }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <x-status-badge :status="$project->status" />
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $priorityColors = [
-                                        'critical' => 'bg-red-100 text-red-800 border border-red-300 animate-pulse',
-                                        'high' => 'bg-orange-100 text-orange-800 border border-orange-300',
-                                        'medium' => 'bg-yellow-100 text-yellow-800 border border-yellow-300',
-                                        'low' => 'bg-slate-100 text-slate-800 border border-slate-300',
-                                    ];
-                                    $priorityIcons = [
-                                        'critical' => '🔴',
-                                        'high' => '🟠',
-                                        'medium' => '🟡',
-                                        'low' => '🔵',
-                                    ];
-                                @endphp
-                                <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full {{ $priorityColors[$project->priority] ?? 'bg-gray-100' }}">
-                                    {{ $priorityIcons[$project->priority] ?? '' }} {{ ucfirst($project->priority) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                @if($project->tasks_count > 0)
-                                    <div class="w-32">
-                                        <x-progress-bar :value="$project->progress ?? 0" />
-                                    </div>
-                                @else
-                                    <span class="text-gray-400">—</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">
-                                @if($project->due_date)
-                                    <span class="{{ $project->due_date->isPast() && $project->status !== 'completed' ? 'text-red-600 font-medium' : '' }}">
-                                        {{ $project->due_date->format('M d, Y') }}
-                                    </span>
-                                @else
-                                    <span class="text-gray-400">No date</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">
-                                {{ $project->tasks_count ?? 0 }} tasks
-                            </td>
-                            <td class="px-6 py-4">
-                                <a href="{{ route('projects.show', $project) }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
-                                    View Details →
-                                </a>
-                            </td>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Project Name</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Manager</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Priority</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Progress</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Due Date</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Tasks</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Action</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        @foreach($projects as $project)
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 group">
+                                <td class="px-6 py-4">
+                                    <a href="{{ route('projects.show', $project) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-bold text-sm transition-colors">
+                                        {{ $project->name }}
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">
+                                    {{ $project->manager?->name ?? '—' }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <x-status-badge :status="$project->status" />
+                                </td>
+                                <td class="px-6 py-4">
+                                    @php
+                                        $priorityColors = [
+                                            'critical' => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700',
+                                            'high' => 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700',
+                                            'medium' => 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700',
+                                            'low' => 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600',
+                                        ];
+                                        $priorityIcons = [
+                                            'critical' => '🔴',
+                                            'high' => '🟠',
+                                            'medium' => '🟡',
+                                            'low' => '🔵',
+                                        ];
+                                    @endphp
+                                    <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold rounded-lg {{ $priorityColors[$project->priority] ?? 'bg-slate-100' }} transition-all transform group-hover:scale-105">
+                                        <span>{{ $priorityIcons[$project->priority] ?? '' }}</span>
+                                        <span>{{ ucfirst($project->priority) }}</span>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if($project->tasks_count > 0)
+                                        <div class="w-32">
+                                            <x-progress-bar :value="$project->progress ?? 0" />
+                                        </div>
+                                    @else
+                                        <span class="text-slate-400 font-medium">—</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-sm font-medium">
+                                    @if($project->due_date)
+                                        <span class="px-2 py-1 rounded-lg {{ $project->due_date->isPast() && $project->status !== 'completed' ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 font-bold' : 'text-slate-600 dark:text-slate-400' }}">
+                                            {{ $project->due_date->format('M d') }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+                                    <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-bold">{{ $project->tasks_count ?? 0 }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{{ route('projects.show', $project) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-bold rounded-lg transition-all transform hover:scale-105 shadow-md hover:shadow-lg">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        {{-- Pagination --}}
-        <div class="mt-6">
-            {{ $projects->links() }}
+        {{-- Pagination with Modern Styling --}}
+        <div class="mt-8 flex justify-center">
+            {{ $projects->links('pagination::tailwind') }}
         </div>
     @else
-        {{-- Empty State --}}
-        <div class="bg-white rounded-lg shadow p-12 text-center">
-            <div class="text-6xl mb-4">📋</div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-            <p class="text-gray-500 mb-6">
+        {{-- Enhanced Empty State --}}
+        <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/30 dark:to-slate-800/30 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 p-16 text-center shadow-sm">
+            <div class="text-7xl mb-4 opacity-50">📋</div>
+            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">No Projects Found</h3>
+            <p class="text-slate-600 dark:text-slate-400 mb-8 text-lg">
                 @can('create', App\Models\Project::class)
                     Get started by creating your first project.
                 @else
@@ -140,8 +146,11 @@
                 @endcan
             </p>
             @can('create', App\Models\Project::class)
-                <a href="{{ route('projects.create') }}" class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    Create Project
+                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create Your First Project
                 </a>
             @endcan
         </div>

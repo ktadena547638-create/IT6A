@@ -4,80 +4,86 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-    <!-- KPI Grid -->
+    <!-- KPI Grid with Enhanced Design -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Projects -->
-        <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm hover:shadow-md transition">
+        <!-- Total Projects - Blue Gradient -->
+        <div class="group bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl border border-blue-200 dark:border-blue-700 p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-slate-600 text-sm font-medium">Total Projects</p>
-                    <p class="text-3xl font-bold text-slate-900 mt-2">{{ $projectCount }}</p>
+                    <p class="text-blue-600 dark:text-blue-300 text-xs font-semibold uppercase tracking-wider">Total Projects</p>
+                    <p class="text-4xl font-bold text-blue-900 dark:text-blue-100 mt-3">{{ $projectCount }}</p>
                 </div>
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-16 h-16 bg-white dark:bg-blue-800/50 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
                 </div>
             </div>
-            <p class="text-xs text-slate-500 mt-4">Average Health: <span class="font-semibold text-slate-900">{{ $projectHealth }}%</span></p>
+            <div class="mt-4 pt-4 border-t border-blue-200 dark:border-blue-700">
+                <p class="text-xs text-blue-600 dark:text-blue-300">Health Score: <span class="font-bold text-lg">{{ $projectHealth }}%</span></p>
+            </div>
         </div>
 
-        <!-- My Tasks -->
-        <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm hover:shadow-md transition">
+        <!-- My Tasks - Indigo Gradient -->
+        <div class="group bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-xl border border-indigo-200 dark:border-indigo-700 p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-slate-600 text-sm font-medium">My Tasks</p>
-                    <p class="text-3xl font-bold text-slate-900 mt-2">{{ $assignedTasks }}</p>
+                    <p class="text-indigo-600 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider">My Tasks</p>
+                    <p class="text-4xl font-bold text-indigo-900 dark:text-indigo-100 mt-3">{{ $assignedTasks }}</p>
                 </div>
-                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-16 h-16 bg-white dark:bg-indigo-800/50 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+                    <svg class="w-8 h-8 text-indigo-600 dark:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                     </svg>
                 </div>
             </div>
-            <p class="text-xs text-slate-500 mt-4">Completed: <span class="font-semibold text-slate-900">{{ $completedTasks }}</span></p>
+            <div class="mt-4 pt-4 border-t border-indigo-200 dark:border-indigo-700">
+                <p class="text-xs text-indigo-600 dark:text-indigo-300">Completed: <span class="font-bold text-lg">{{ $completedTasks }}</span></p>
+            </div>
         </div>
 
-        <!-- Overdue Tasks -->
-        <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm hover:shadow-md transition {{ $overdueTasks > 0 ? 'border-red-300 border-2' : '' }}">
+        <!-- Overdue Tasks - Red/Green Gradient -->
+        <div class="group bg-gradient-to-br {{ $overdueTasks > 0 ? 'from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-red-200 dark:border-red-700' : 'from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border-green-200 dark:border-green-700' }} rounded-xl border p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-slate-600 text-sm font-medium">Overdue Tasks</p>
-                    <p class="text-3xl font-bold {{ $overdueTasks > 0 ? 'text-red-600' : 'text-slate-900' }} mt-2">{{ $overdueTasks }}</p>
+                    <p class="{{  $overdueTasks > 0 ? 'text-red-600 dark:text-red-300' : 'text-green-600 dark:text-green-300' }} text-xs font-semibold uppercase tracking-wider">Overdue Tasks</p>
+                    <p class="text-4xl font-bold {{ $overdueTasks > 0 ? 'text-red-900 dark:text-red-100' : 'text-green-900 dark:text-green-100' }} mt-3">{{ $overdueTasks }}</p>
                 </div>
-                <div class="w-12 h-12 {{ $overdueTasks > 0 ? 'bg-red-100' : 'bg-green-100' }} rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 {{ $overdueTasks > 0 ? 'text-red-600' : 'text-green-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-16 h-16 {{ $overdueTasks > 0 ? 'bg-white dark:bg-red-800/50' : 'bg-white dark:bg-green-800/50' }} rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+                    <svg class="w-8 h-8 {{ $overdueTasks > 0 ? 'text-red-600 dark:text-red-300' : 'text-green-600 dark:text-green-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
             </div>
-            <p class="text-xs text-slate-500 mt-4">Due Today: <span class="font-semibold text-slate-900">{{ $tasksDueToday }}</span></p>
+            <div class="mt-4 pt-4 {{ $overdueTasks > 0 ? 'border-t border-red-200 dark:border-red-700' : 'border-t border-green-200 dark:border-green-700' }}">
+                <p class="text-xs {{ $overdueTasks > 0 ? 'text-red-600 dark:text-red-300' : 'text-green-600 dark:text-green-300' }}">Due Today: <span class="font-bold text-lg">{{ $tasksDueToday }}</span></p>
+            </div>
         </div>
 
-        <!-- Priority Breakdown (Projects) -->
-        <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm hover:shadow-md transition">
-            <p class="text-slate-600 text-sm font-medium mb-4">📊 Project Priority Breakdown</p>
-            <div class="space-y-2">
+        <!-- Priority Breakdown - Purple Gradient -->
+        <div class="group bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl border border-purple-200 dark:border-purple-700 p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+            <p class="text-purple-600 dark:text-purple-300 text-xs font-semibold uppercase tracking-wider mb-4">📊 Priority Breakdown</p>
+            <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs text-slate-600">🔴 Critical</span>
-                    <span class="font-semibold text-red-600">{{ $projectsByPriority['critical'] ?? 0 }}</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">🔴 Critical</span>
+                    <span class="font-bold px-3 py-1 bg-red-200 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-full text-sm">{{ $projectsByPriority['critical'] ?? 0 }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs text-slate-600">🟠 High</span>
-                    <span class="font-semibold text-orange-600">{{ $projectsByPriority['high'] ?? 0 }}</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">🟠 High</span>
+                    <span class="font-bold px-3 py-1 bg-orange-200 dark:bg-orange-900/50 text-orange-700 dark:text-orange-200 rounded-full text-sm">{{ $projectsByPriority['high'] ?? 0 }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs text-slate-600">🟡 Medium</span>
-                    <span class="font-semibold text-amber-600">{{ $projectsByPriority['medium'] ?? 0 }}</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">🟡 Medium</span>
+                    <span class="font-bold px-3 py-1 bg-amber-200 dark:bg-amber-900/50 text-amber-700 dark:text-amber-200 rounded-full text-sm">{{ $projectsByPriority['medium'] ?? 0 }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs text-slate-600">🔵 Low</span>
-                    <span class="font-semibold text-slate-600">{{ $projectsByPriority['low'] ?? 0 }}</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">🔵 Low</span>
+                    <span class="font-bold px-3 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm">{{ $projectsByPriority['low'] ?? 0 }}</span>
                 </div>
             </div>
-            <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">
-                Total: <span class="font-semibold text-slate-900">{{ ($projectsByPriority['critical'] ?? 0) + ($projectsByPriority['high'] ?? 0) + ($projectsByPriority['medium'] ?? 0) + ($projectsByPriority['low'] ?? 0) }}</span>
-            </p>
+            <div class="mt-4 pt-4 border-t border-purple-200 dark:border-purple-700">
+                <p class="text-xs text-purple-600 dark:text-purple-300 font-semibold">Total: <span class="text-lg">{{ ($projectsByPriority['critical'] ?? 0) + ($projectsByPriority['high'] ?? 0) + ($projectsByPriority['medium'] ?? 0) + ($projectsByPriority['low'] ?? 0) }}</span></p>
+            </div>
         </div>
     </div>
 

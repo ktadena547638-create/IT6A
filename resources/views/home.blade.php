@@ -22,57 +22,69 @@
             </div>
         </div>
 
-        {{-- ========== QUICK STATS GRID ========== --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {{-- ========== QUICK STATS GRID - ENHANCED ========== --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             {{-- Total Projects Card --}}
-            <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 border-l-4 border-blue-500">
+            <div class="group bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl border border-blue-200 dark:border-blue-700 p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold">Total Projects</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                        <p class="text-blue-600 dark:text-blue-300 text-xs font-bold uppercase tracking-wider">Total Projects</p>
+                        <p class="text-4xl font-bold text-blue-900 dark:text-blue-100 mt-3">
                             {{ $quickStats['total_projects'] ?? 0 }}
                         </p>
                     </div>
-                    <div class="text-4xl opacity-30">📁</div>
+                    <div class="w-16 h-16 bg-white dark:bg-blue-800/50 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all text-2xl">📁</div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-blue-200 dark:border-blue-700">
+                    <p class="text-xs text-blue-600 dark:text-blue-300 font-medium">All your projects</p>
                 </div>
             </div>
 
             {{-- Active Projects Card --}}
-            <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 border-l-4 border-green-500">
+            <div class="group bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl border border-green-200 dark:border-green-700 p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold">Active Now</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                        <p class="text-green-600 dark:text-green-300 text-xs font-bold uppercase tracking-wider">Active Now</p>
+                        <p class="text-4xl font-bold text-green-900 dark:text-green-100 mt-3">
                             {{ $quickStats['active_projects'] ?? 0 }}
                         </p>
                     </div>
-                    <div class="text-4xl opacity-30">🚀</div>
+                    <div class="w-16 h-16 bg-white dark:bg-green-800/50 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all text-2xl">🚀</div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+                    <p class="text-xs text-green-600 dark:text-green-300 font-medium">In progress</p>
                 </div>
             </div>
 
             {{-- Assigned Tasks Card --}}
-            <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 border-l-4 border-orange-500">
+            <div class="group bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 rounded-xl border border-orange-200 dark:border-orange-700 p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold">Assigned Tasks</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                        <p class="text-orange-600 dark:text-orange-300 text-xs font-bold uppercase tracking-wider">Assigned Tasks</p>
+                        <p class="text-4xl font-bold text-orange-900 dark:text-orange-100 mt-3">
                             {{ $quickStats['assigned_tasks'] ?? 0 }}
                         </p>
                     </div>
-                    <div class="text-4xl opacity-30">✓</div>
+                    <div class="w-16 h-16 bg-white dark:bg-orange-800/50 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all text-2xl">✓</div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-orange-200 dark:border-orange-700">
+                    <p class="text-xs text-orange-600 dark:text-orange-300 font-medium">Awaiting attention</p>
                 </div>
             </div>
 
             {{-- Completed Today Card --}}
-            <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 border-l-4 border-purple-500">
+            <div class="group bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl border border-purple-200 dark:border-purple-700 p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold">Completed Today</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                        <p class="text-purple-600 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">Completed Today</p>
+                        <p class="text-4xl font-bold text-purple-900 dark:text-purple-100 mt-3">
                             {{ $quickStats['completed_today'] ?? 0 }}
                         </p>
                     </div>
-                    <div class="text-4xl opacity-30">⭐</div>
+                    <div class="w-16 h-16 bg-white dark:bg-purple-800/50 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all text-2xl">⭐</div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-purple-200 dark:border-purple-700">
+                    <p class="text-xs text-purple-600 dark:text-purple-300 font-medium">Great progress!</p>
                 </div>
             </div>
         </div>
