@@ -4,6 +4,19 @@ use Illuminate\Support\Str;
 use Pdo\Mysql;
 
 $databaseUrl = env('DB_URL', env('DATABASE_URL'));
+$defaultConnection = env('DB_CONNECTION', 'mysql');
+
+if ($databaseUrl) {
+    $scheme = parse_url($databaseUrl, PHP_URL_SCHEME);
+
+    if (in_array($scheme, ['postgres', 'postgresql'], true)) {
+        $defaultConnection = 'pgsql';
+    } elseif ($scheme === 'mariadb') {
+        $defaultConnection = 'mariadb';
+    } elseif ($scheme === 'mysql') {
+        $defaultConnection = 'mysql';
+    }
+}
 
 return [
 
@@ -19,7 +32,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', $databaseUrl ? 'pgsql' : 'mysql'),
+    'default' => $defaultConnection,
 
     /*
     |--------------------------------------------------------------------------

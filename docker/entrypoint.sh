@@ -8,6 +8,21 @@ if [ -z "${APP_KEY:-}" ]; then
     exit 1
 fi
 
+if [ -z "${DB_CONNECTION:-}" ] && [ -n "${DB_URL:-}${DATABASE_URL:-}" ]; then
+    db_url="${DB_URL:-$DATABASE_URL}"
+    case "$db_url" in
+        postgres://*|postgresql://*)
+            export DB_CONNECTION=pgsql
+            ;;
+        mysql://*)
+            export DB_CONNECTION=mysql
+            ;;
+        mariadb://*)
+            export DB_CONNECTION=mariadb
+            ;;
+    esac
+fi
+
 php artisan config:cache
 
 attempt=1
