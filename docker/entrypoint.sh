@@ -8,8 +8,12 @@ if [ -z "${APP_KEY:-}" ]; then
     exit 1
 fi
 
-if [ -z "${DB_CONNECTION:-}" ] && [ -n "${DB_URL:-}${DATABASE_URL:-}" ]; then
-    db_url="${DB_URL:-$DATABASE_URL}"
+db_url="${DB_URL:-${DATABASE_URL:-}}"
+
+if [ -n "$db_url" ]; then
+    export DB_URL="$db_url"
+    export DATABASE_URL="$db_url"
+
     case "$db_url" in
         postgres://*|postgresql://*)
             export DB_CONNECTION=pgsql
