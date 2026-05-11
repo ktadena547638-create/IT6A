@@ -1,0 +1,197 @@
+@extends('layouts.app')
+
+@section('title', 'Projects')
+
+@section('content')
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- PAGE HEADER: Clean, professional typography -->
+    <div class="flex justify-between items-start mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">Projects</h1>
+            <p class="mt-2 text-sm text-slate-600">Enterprise project inventory and status tracking</p>
+        </div>
+        @can('create', App\Models\Project::class)
+            <a href="{{ route('projects.create') }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm">
+                + New Project
+            </a>
+        @endcan
+    </div>
+
+    <!-- FILTER SECTION: Lean, minimal controls -->
+    <div class="mb-6 flex gap-2 flex-wrap">
+        <form method="GET" class="flex gap-2 flex-wrap">
+            <!-- Priority Filter -->
+            <select name="priority" onchange="this.form.submit()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white hover:border-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                <option value="">All Priorities</option>
+                <option value="critical" {{ request('priority') === 'critical' ? 'selected' : '' }}>🔴 Critical</option>
+                <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>🟠 High</option>
+                <option value="medium" {{ request('priority') === 'medium' ? 'selected' : '' }}>🟡 Medium</option>
+                <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>🔵 Low</option>
+            </select>
+            
+            <!-- Status Filter -->
+            <select name="status" onchange="this.form.submit()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white hover:border-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                <option value="">All Statuses</option>
+                <option value="planning" {{ request('status') === 'planning' ? 'selected' : '' }}>Planning</option>
+                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                <option value="on_hold" {{ request('status') === 'on_hold' ? 'selected' : '' }}>On Hold</option>
+                <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
+            </select>
+            
+            <!-- Search Input -->
+            <input type="text" name="search" placeholder="Search projects..." value="{{ request('search') }}" 
+                   class="px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white placeholder-slate-400 hover:border-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+            
+            <!-- Submit Button -->
+            <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm">
+                Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- PROJECTS TABLE: Forensic-style lean design -->
+    @if($projects->count() > 0)
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <!-- Table Header: Minimal, uppercase labels -->
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-tight">Project</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-tight">Manager</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-tight">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-tight">Priority</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-tight">Progress</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-tight">Due</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-tight">Tasks</th>
+                            <th class="px-6 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-tight">Action</th>
+                        </tr>
+                    </thead>
+                    
+                    <!-- Table Body: Lean rows with minimal hover effect -->
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($projects as $project)
+                            <tr class="hover:bg-slate-50 transition-colors duration-150">
+                                <!-- Project Name Column -->
+                                <td class="px-6 py-4 text-sm">
+                                    <a href="{{ route('projects.show', $project) }}" class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
+                                        {{ $project->name }}
+                                    </a>
+                                </td>
+                                
+                                <!-- Manager Column -->
+                                <td class="px-6 py-4 text-sm text-slate-600 font-medium">
+                                    {{ $project->manager?->name ?? '—' }}
+                                </td>
+                                
+                                <!-- Status Column -->
+                                <td class="px-6 py-4 text-sm">
+                                    <x-status-badge :status="$project->status" />
+                                </td>
+                                
+                                <!-- Priority Column: Emerald/Indigo accent -->
+                                <td class="px-6 py-4">
+                                    @php
+                                        $priorityColors = [
+                                            'critical' => 'border-red-300 text-red-700 bg-red-50',
+                                            'high' => 'border-orange-300 text-orange-700 bg-orange-50',
+                                            'medium' => 'border-amber-300 text-amber-700 bg-amber-50',
+                                            'low' => 'border-slate-300 text-slate-700 bg-slate-50',
+                                        ];
+                                        $priorityIcons = [
+                                            'critical' => '🔴',
+                                            'high' => '🟠',
+                                            'medium' => '🟡',
+                                            'low' => '🔵',
+                                        ];
+                                    @endphp
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded border {{ $priorityColors[$project->priority] ?? 'border-slate-300 text-slate-700 bg-slate-50' }}">
+                                        <span>{{ $priorityIcons[$project->priority] ?? '' }}</span>
+                                        <span>{{ ucfirst($project->priority) }}</span>
+                                    </span>
+                                </td>
+                                
+                                <!-- Progress Column -->
+                                <td class="px-6 py-4">
+                                    @if($project->tasks_count > 0)
+                                        <div class="w-24">
+                                            <x-progress-bar :value="$project->progress ?? 0" />
+                                        </div>
+                                    @else
+                                        <span class="text-slate-400 text-sm font-medium">—</span>
+                                    @endif
+                                </td>
+                                
+                                <!-- Due Date Column -->
+                                <td class="px-6 py-4 text-sm font-medium">
+                                    @if($project->due_date)
+                                        <span class="px-2 py-1 rounded {{ $project->due_date->isPast() && $project->status !== 'completed' ? 'text-red-700 bg-red-50 font-bold' : 'text-slate-600' }}">
+                                            {{ $project->due_date->format('M d') }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+                                
+                                <!-- Tasks Count Column -->
+                                <td class="px-6 py-4 text-sm">
+                                    <span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded">
+                                        {{ $project->tasks_count ?? 0 }}
+                                    </span>
+                                </td>
+                                
+                                <!-- Action Column: Emerald accent button -->
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{{ route('projects.show', $project) }}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded transition-colors duration-200 shadow-sm hover:shadow-md">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGINATION: Clean styling -->
+        <div class="mt-6 flex justify-center">
+            {{ $projects->links('pagination::tailwind') }}
+        </div>
+    @else
+        <!-- EMPTY STATE: Professional messaging -->
+        <div class="bg-white border border-slate-200 rounded-lg p-12 text-center shadow-sm">
+            <svg class="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">No Projects Found</h3>
+            <p class="text-slate-600 mb-6">
+                @can('create', App\Models\Project::class)
+                    Create your first project to get started.
+                @else
+                    No projects available. Contact your administrator.
+                @endcan
+            </p>
+            @can('create', App\Models\Project::class)
+                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create First Project
+                </a>
+            @endcan
+        </div>
+    @endif
+</div>
+@endsection
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create Your First Project
+                </a>
+            @endcan
+        </div>
+    @endif
+</div>
+@endsection
