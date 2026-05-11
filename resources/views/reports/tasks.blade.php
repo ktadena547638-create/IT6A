@@ -4,152 +4,172 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    {{-- Header --}}
+    <!-- PAGE HEADER: Professional enterprise styling -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Task Analytics Report</h1>
-        <p class="mt-1 text-gray-500">Overview of task priorities, deadlines, and completion status</p>
+        <h1 class="text-3xl font-bold text-slate-900">Task Analytics</h1>
+        <p class="mt-2 text-sm text-slate-600">Comprehensive task intelligence: priorities, deadlines, completion tracking</p>
     </div>
 
-    {{-- Metric Cards Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {{-- Overdue Tasks Card --}}
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Overdue Tasks</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">
-                        @if(is_countable($overdueTasks))
-                            {{ count($overdueTasks) }}
-                        @else
-                            {{ $overdueTasks ?? 0 }}
-                        @endif
-                    </p>
-                </div>
-                <div class="text-4xl text-red-500">⚠️</div>
+    <!-- METRIC CARDS GRID: Bento-style KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <!-- Card 1: Overdue Tasks (Red accent for urgency) -->
+        <div class="bg-white border border-slate-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-start justify-between mb-4">
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Overdue Tasks</h3>
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
             </div>
-            <p class="mt-4 text-sm text-gray-500">
-                @if((is_countable($overdueTasks) ? count($overdueTasks) : $overdueTasks) > 0)
-                    Requires immediate attention
+            <p class="text-4xl font-bold text-slate-900 mb-2">
+                @if(is_countable($overdueTasks))
+                    {{ count($overdueTasks) }}
                 @else
-                    All caught up! ✨
+                    {{ $overdueTasks ?? 0 }}
+                @endif
+            </p>
+            <p class="text-sm {{ (is_countable($overdueTasks) ? count($overdueTasks) : $overdueTasks) > 0 ? 'text-red-700' : 'text-emerald-700' }} font-medium">
+                @if((is_countable($overdueTasks) ? count($overdueTasks) : $overdueTasks) > 0)
+                    Requires immediate action
+                @else
+                    All on schedule ✓
                 @endif
             </p>
         </div>
 
-        {{-- Due Today Card --}}
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-amber-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Due Today</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">
-                        @if(is_countable($tasksDueToday))
-                            {{ count($tasksDueToday) }}
-                        @else
-                            {{ $tasksDueToday ?? 0 }}
-                        @endif
-                    </p>
-                </div>
-                <div class="text-4xl text-amber-500">📅</div>
+        <!-- Card 2: Due Today (Amber accent) -->
+        <div class="bg-white border border-slate-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-start justify-between mb-4">
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Due Today</h3>
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
             </div>
-            <p class="mt-4 text-sm text-gray-500">
+            <p class="text-4xl font-bold text-slate-900 mb-2">
+                @if(is_countable($tasksDueToday))
+                    {{ count($tasksDueToday) }}
+                @else
+                    {{ $tasksDueToday ?? 0 }}
+                @endif
+            </p>
+            <p class="text-sm text-slate-600 font-medium">
                 @if((is_countable($tasksDueToday) ? count($tasksDueToday) : $tasksDueToday) > 0)
-                    Keep focused on today
+                    Focus on today's priorities
                 @else
                     No pressing deadlines
                 @endif
             </p>
         </div>
 
-        {{-- Total Tasks Card --}}
-        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
+        <!-- Card 3: Total Tasks (Indigo accent) -->
+        <div class="bg-white border border-slate-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-start justify-between mb-4">
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Total Tasks</h3>
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+            </div>
+            <p class="text-4xl font-bold text-slate-900 mb-2">
+                {{ ($tasksByPriority['critical'] ?? 0) + ($tasksByPriority['high'] ?? 0) + ($tasksByPriority['medium'] ?? 0) + ($tasksByPriority['low'] ?? 0) }}
+            </p>
+            <p class="text-sm text-slate-600 font-medium">Across all priorities</p>
+        </div>
+    </div>
+
+    <!-- PRIORITY BREAKDOWN: Forensic data visualization -->
+    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+        <!-- Card header -->
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-tight">Priority Distribution Analysis</h2>
+        </div>
+        
+        <!-- Card content -->
+        <div class="px-6 py-6">
+            @php
+                // Calculate totals for percentage calculation
+                $total = ($tasksByPriority['critical'] ?? 0) + 
+                        ($tasksByPriority['high'] ?? 0) + 
+                        ($tasksByPriority['medium'] ?? 0) + 
+                        ($tasksByPriority['low'] ?? 0);
+                $getBarWidth = fn($count) => $total > 0 ? round(($count / $total) * 100, 1) : 0;
+            @endphp
+            
+            <div class="space-y-6">
+                <!-- Critical Priority -->
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total Tasks</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900">
-                        {{ ($tasksByPriority['critical'] ?? 0) + ($tasksByPriority['high'] ?? 0) + ($tasksByPriority['medium'] ?? 0) + ($tasksByPriority['low'] ?? 0) }}
-                    </p>
-                </div>
-                <div class="text-4xl text-blue-500">📊</div>
-            </div>
-            <p class="mt-4 text-sm text-gray-500">Across all priorities</p>
-        </div>
-    </div>
-
-    {{-- Priority Breakdown Card --}}
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-6">Priority Breakdown</h2>
-        
-        {{-- Calculate total safely --}}
-        @php
-            $total = ($tasksByPriority['critical'] ?? 0) + 
-                    ($tasksByPriority['high'] ?? 0) + 
-                    ($tasksByPriority['medium'] ?? 0) + 
-                    ($tasksByPriority['low'] ?? 0);
-            $getBarWidth = fn($count) => $total > 0 ? round(($count / $total) * 100, 1) : 0;
-        @endphp
-        
-        <div class="space-y-4">
-            {{-- Critical Priority --}}
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <span class="inline-block w-3 h-3 rounded-full bg-red-600 mr-3"></span>
-                    <span class="text-sm font-medium text-gray-700">Critical</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-red-600" style="width: {{ $getBarWidth($tasksByPriority['critical'] ?? 0) }}%"></div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="inline-block w-3 h-3 rounded-full bg-red-600"></span>
+                            <span class="text-sm font-medium text-slate-900">Critical Priority</span>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-900">{{ $tasksByPriority['critical'] ?? 0 }}</span>
                     </div>
-                    <span class="text-lg font-bold text-gray-900 w-12 text-right">{{ $tasksByPriority['critical'] ?? 0 }}</span>
-                </div>
-            </div>
-
-            {{-- High Priority --}}
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <span class="inline-block w-3 h-3 rounded-full bg-orange-500 mr-3"></span>
-                    <span class="text-sm font-medium text-gray-700">High</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-orange-500" style="width: {{ $getBarWidth($tasksByPriority['high'] ?? 0) }}%"></div>
+                    <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-red-600 transition-all duration-300" style="width: {{ $getBarWidth($tasksByPriority['critical'] ?? 0) }}%"></div>
                     </div>
-                    <span class="text-lg font-bold text-gray-900 w-12 text-right">{{ $tasksByPriority['high'] ?? 0 }}</span>
+                    <p class="text-xs text-slate-500 mt-1">{{ $getBarWidth($tasksByPriority['critical'] ?? 0) }}% of total</p>
                 </div>
-            </div>
 
-            {{-- Medium Priority --}}
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <span class="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-3"></span>
-                    <span class="text-sm font-medium text-gray-700">Medium</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-yellow-500" style="width: {{ $getBarWidth($tasksByPriority['medium'] ?? 0) }}%"></div>
+                <!-- High Priority -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="inline-block w-3 h-3 rounded-full bg-orange-600"></span>
+                            <span class="text-sm font-medium text-slate-900">High Priority</span>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-900">{{ $tasksByPriority['high'] ?? 0 }}</span>
                     </div>
-                    <span class="text-lg font-bold text-gray-900 w-12 text-right">{{ $tasksByPriority['medium'] ?? 0 }}</span>
+                    <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-orange-600 transition-all duration-300" style="width: {{ $getBarWidth($tasksByPriority['high'] ?? 0) }}%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">{{ $getBarWidth($tasksByPriority['high'] ?? 0) }}% of total</p>
+                </div>
+
+                <!-- Medium Priority -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="inline-block w-3 h-3 rounded-full bg-amber-600"></span>
+                            <span class="text-sm font-medium text-slate-900">Medium Priority</span>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-900">{{ $tasksByPriority['medium'] ?? 0 }}</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-amber-600 transition-all duration-300" style="width: {{ $getBarWidth($tasksByPriority['medium'] ?? 0) }}%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">{{ $getBarWidth($tasksByPriority['medium'] ?? 0) }}% of total</p>
+                </div>
+
+                <!-- Low Priority -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <span class="inline-block w-3 h-3 rounded-full bg-slate-600"></span>
+                            <span class="text-sm font-medium text-slate-900">Low Priority</span>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-900">{{ $tasksByPriority['low'] ?? 0 }}</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-slate-600 transition-all duration-300" style="width: {{ $getBarWidth($tasksByPriority['low'] ?? 0) }}%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">{{ $getBarWidth($tasksByPriority['low'] ?? 0) }}% of total</p>
                 </div>
             </div>
 
-            {{-- Low Priority --}}
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <span class="inline-block w-3 h-3 rounded-full bg-blue-500 mr-3"></span>
-                    <span class="text-sm font-medium text-gray-700">Low</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-blue-500" style="width: {{ $getBarWidth($tasksByPriority['low'] ?? 0) }}%"></div>
-                    </div>
-                    <span class="text-lg font-bold text-gray-900 w-12 text-right">{{ $tasksByPriority['low'] ?? 0 }}</span>
-                </div>
+            <!-- Summary footer -->
+            <div class="mt-6 pt-4 border-t border-slate-100">
+                <p class="text-xs text-slate-600">
+                    <span class="font-semibold">Total tasks analyzed:</span> {{ $total }}
+                </p>
             </div>
         </div>
     </div>
 
-    {{-- Action Button --}}
-    <div class="mt-8 text-center">
-        <a href="{{ route('tasks.index') }}" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+    <!-- ACTION SECTION: Quick navigation -->
+    <div class="mt-8 flex justify-center">
+        <a href="{{ route('tasks.index') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
             View All Tasks
         </a>
     </div>
