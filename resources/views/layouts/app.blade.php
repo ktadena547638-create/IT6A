@@ -170,22 +170,45 @@
                 
                 <!-- User Profile Section -->
                 <div class="border-t" style="border-color: #1e1e28; padding: 8px;" x-data="{ open: false }" @click.away="open = false">
-                    <button @click="open = !open" class="icon-button w-full flex items-center justify-center">
-                        <div class="w-6 h-6 rounded flex items-center justify-center accent-cyan text-xs font-bold">
+                    <button @click="open = !open" class="icon-button w-full flex items-center justify-center hover:bg-cyan-500/10">
+                        <div class="w-6 h-6 rounded flex items-center justify-center accent-cyan text-xs font-bold bg-cyan-500/20">
                             {{ substr(auth()->user()->name, 0, 1) }}
                         </div>
                         <span class="icon-label">{{ auth()->user()->name }}</span>
                     </button>
                     
-                    <!-- Dropdown menu -->
-                    <div x-show="open" class="absolute left-0 bottom-16 w-48 bg-[#0d0d12] border border-[#1e1e28] rounded shadow-lg z-50" style="box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);">
-                        <a href="{{ route('profile.preferences') }}" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-gray-300 transition border-b" style="border-color: #1e1e28;">
-                            ⚙️ Preferences
+                    <!-- Dropdown menu - Enhanced visibility -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute left-1 bottom-20 w-56 rounded-md z-50 overflow-hidden" style="background-color: #0d0d12; border: 2px solid #0ea5e9; box-shadow: 0 15px 35px rgba(14, 165, 233, 0.15), 0 10px 15px rgba(0,0,0,0.5);">
+                        
+                        <!-- Menu Header -->
+                        <div class="px-4 py-3 border-b" style="border-color: #1e1e28; background: rgba(14, 165, 233, 0.05);">
+                            <p class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">Menu</p>
+                        </div>
+                        
+                        <!-- Preferences Link -->
+                        <a href="{{ route('profile.preferences') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-cyan-500/10 hover:text-cyan-400 transition border-b" style="border-color: #1e1e28;">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Preferences</span>
                         </a>
+                        
+                        <!-- Logout Button -->
                         <form method="POST" action="{{ route('logout') }}" class="block">
                             @csrf
-                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-red-400 transition">
-                                🚪 Logout
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                <span>Logout</span>
                             </button>
                         </form>
                     </div>
@@ -213,24 +236,48 @@
                         
                         <!-- User menu dropdown -->
                         <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                            <button @click="open = !open" class="flex items-center gap-2 p-2 hover:bg-[#1e1e28] rounded transition">
+                            <button @click="open = !open" class="flex items-center gap-2 p-2 hover:bg-cyan-500/10 rounded transition">
                                 <div class="text-right text-sm">
                                     <p class="font-medium text-white">{{ auth()->user()->name }}</p>
                                     <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
                                 </div>
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-gray-400 transition" :class="open && 'text-cyan-400 rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                                 </svg>
                             </button>
-                            <!-- Dropdown -->
-                            <div x-show="open" class="absolute right-0 mt-2 w-48 bg-[#0d0d12] border border-[#1e1e28] rounded shadow-lg z-50" style="box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);">
-                                <a href="{{ route('profile.preferences') }}" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-gray-300 transition border-b" style="border-color: #1e1e28;">
-                                    ⚙️ Preferences
+                            <!-- Dropdown Menu - Enhanced -->
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                                 class="absolute right-0 mt-3 w-56 rounded-md z-50 overflow-hidden" style="background-color: #0d0d12; border: 2px solid #0ea5e9; box-shadow: 0 15px 35px rgba(14, 165, 233, 0.15), 0 10px 15px rgba(0,0,0,0.5);">
+                                
+                                <!-- Menu Header -->
+                                <div class="px-4 py-3 border-b" style="border-color: #1e1e28; background: rgba(14, 165, 233, 0.05);">
+                                    <p class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">{{ auth()->user()->name }}</p>
+                                    <p class="text-xs text-gray-500 mt-1 capitalize">{{ auth()->user()->role }}</p>
+                                </div>
+                                
+                                <!-- Preferences Link -->
+                                <a href="{{ route('profile.preferences') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-cyan-500/10 hover:text-cyan-400 transition border-b" style="border-color: #1e1e28;">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <span>Preferences</span>
                                 </a>
+                                
+                                <!-- Logout Button -->
                                 <form method="POST" action="{{ route('logout') }}" class="block">
                                     @csrf
-                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-red-400 transition">
-                                        🚪 Logout
+                                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                        </svg>
+                                        <span>Logout</span>
                                     </button>
                                 </form>
                             </div>
