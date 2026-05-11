@@ -4,31 +4,51 @@
 @section('page-title', '📊 Dashboard')
 
 @section('content')
+    <style>
+        @keyframes pulse-critical {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .pulse-critical {
+            animation: pulse-critical 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .metric-lift {
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .metric-lift:hover {
+            transform: translateY(-4px);
+            border-color: #2d2d38 !important;
+        }
+        .grid-panel {
+            transition: all 200ms ease;
+        }
+    </style>
+
     <!-- OBSIDIAN HIGH-DENSITY GRID: KPI Metrics with monospaced numbers -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <!-- KPI 1: Total Projects -->
-        <div class="grid-panel p-4 hover:border-[#2d2d38]">
+        <div class="grid-panel p-4 hover:border-[#2d2d38] metric-lift cursor-pointer">
             <p class="text-xs text-gray-500 uppercase tracking-wider mb-3">Projects</p>
             <p class="metrics-display text-3xl text-white mb-2">{{ str_pad($projectCount, 2, '0', STR_PAD_LEFT) }}</p>
             <p class="text-xs text-gray-400">Health: <span class="accent-cyan">{{ $projectHealth }}%</span></p>
         </div>
 
         <!-- KPI 2: My Tasks -->
-        <div class="grid-panel p-4 hover:border-[#2d2d38]">
+        <div class="grid-panel p-4 hover:border-[#2d2d38] metric-lift cursor-pointer">
             <p class="text-xs text-gray-500 uppercase tracking-wider mb-3">Tasks</p>
             <p class="metrics-display text-3xl text-white mb-2">{{ str_pad($assignedTasks, 2, '0', STR_PAD_LEFT) }}</p>
             <p class="text-xs text-gray-400">Done: <span class="accent-cyan">{{ $completedTasks }}</span></p>
         </div>
 
         <!-- KPI 3: Overdue (Alert if > 0) -->
-        <div class="grid-panel p-4 {{ $overdueTasks > 0 ? 'border-red-600/50' : 'hover:border-[#2d2d38]' }}">
+        <div class="grid-panel p-4 {{ $overdueTasks > 0 ? 'border-red-600/50 pulse-critical' : 'hover:border-[#2d2d38]' }} metric-lift cursor-pointer">
             <p class="text-xs {{ $overdueTasks > 0 ? 'text-red-400' : 'text-gray-500' }} uppercase tracking-wider mb-3">Overdue</p>
             <p class="metrics-display text-3xl {{ $overdueTasks > 0 ? 'text-red-400' : 'text-white' }} mb-2">{{ str_pad($overdueTasks, 2, '0', STR_PAD_LEFT) }}</p>
             <p class="text-xs text-gray-400">Today: <span class="{{ $tasksDueToday > 0 ? 'text-orange-400' : 'accent-cyan' }}">{{ $tasksDueToday }}</span></p>
         </div>
 
         <!-- KPI 4: Priority Breakdown -->
-        <div class="grid-panel p-4 hover:border-[#2d2d38]">
+        <div class="grid-panel p-4 hover:border-[#2d2d38] metric-lift cursor-pointer">
             <p class="text-xs text-gray-500 uppercase tracking-wider mb-3">Distribution</p>
             <div class="space-y-1 text-xs">
                 <div class="flex justify-between"><span class="text-red-400">Critical:</span> <span>{{ $projectsByPriority['critical'] ?? 0 }}</span></div>
