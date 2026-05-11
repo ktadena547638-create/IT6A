@@ -8,24 +8,26 @@ if [ -z "${APP_KEY:-}" ]; then
     exit 1
 fi
 
+echo "[BOOT] APP_ENV=$APP_ENV"
+echo "[BOOT] DB_CONNECTION=${DB_CONNECTION:-not set}"
+echo "[BOOT] DB_URL=${DB_URL:-not set}"
+echo "[BOOT] DATABASE_URL=${DATABASE_URL:-not set}"
+
 db_url="${DB_URL:-${DATABASE_URL:-}}"
 
-if [ -n "$db_url" ]; then
-    export DB_URL="$db_url"
-    export DATABASE_URL="$db_url"
-
-    case "$db_url" in
-        postgres://*|postgresql://*)
-            export DB_CONNECTION=pgsql
-            ;;
-        mysql://*)
-            export DB_CONNECTION=mysql
-            ;;
-        mariadb://*)
-            export DB_CONNECTION=mariadb
-            ;;
-    esac
+if [ -z "$db_url" ]; then
+    echo "[BOOT] ERROR: No database URL found. Cannot proceed." >&2
+    echo "[BOOT] Render must provide DB_URL or DATABASE_URL via render.yaml fromDatabase" >&2
+    exit 1
 fi
+
+echo "[BOOT] Found database URL, forcing pgsql"
+export DB_URL="$db_url"
+export DATABASE_URL="$db_url"
+export DB_CONNECTION=pgsql
+export DB_PORT="${DB_PORT:-5432}"
+
+echo "[BOOT] Final DB_CONNECTION=$DB_CONNECTION DB_PORT=$DB_PORT"
 
 php artisan config:cache
 
