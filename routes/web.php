@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskCommentController;
@@ -27,12 +28,7 @@ use App\Http\Controllers\ClientController;
 */
 
 // Public routes
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('home.index');
-    }
-    return view('welcome');
-})->name('home');
+Route::get('/', [PageController::class, 'landing'])->name('home');
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
@@ -133,13 +129,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/search', [SearchController::class, 'search'])->name('search');
 
     // Profile & preferences
-    Route::get('/profile/preferences', function () {
-        return view('profile.preferences');
-    })->name('profile.preferences');
-    Route::patch('/profile/update-theme', function (\Illuminate\Http\Request $request) {
-        auth()->user()->update(['theme_preference' => $request->theme_preference]);
-        return redirect()->route('profile.preferences')->with('success', 'Theme updated successfully');
-    })->name('profile.update-theme');
+    Route::get('/profile/preferences', [PageController::class, 'preferences'])->name('profile.preferences');
+    Route::patch('/profile/update-theme', [PageController::class, 'updateTheme'])->name('profile.update-theme');
 
     // Reports and analytics (admin/manager only)
     Route::middleware('checkRole:admin,project_manager')->prefix('reports')->name('reports.')->group(function () {

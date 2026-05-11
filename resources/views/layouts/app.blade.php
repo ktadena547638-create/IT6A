@@ -15,6 +15,14 @@
             --carbon: #0d0d12;
             --cyan: #0ea5e9;
             --white: #ffffff;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --radius-art: 14px;
         }
         
         * { font-family: 'Inter', sans-serif; }
@@ -89,6 +97,193 @@
         .accent-cyan { color: var(--cyan); }
         .border-cyan { border-color: var(--cyan); }
         .bg-cyan-subtle { background: rgba(14, 165, 233, 0.1); }
+
+        /* Global content harmonizer: unify remaining legacy light UI into premium obsidian style */
+        .content-theme {
+            background-image:
+                radial-gradient(circle at 8% 12%, rgba(14, 165, 233, 0.08), transparent 32%),
+                radial-gradient(circle at 92% 8%, rgba(59, 130, 246, 0.06), transparent 28%),
+                linear-gradient(180deg, rgba(5, 5, 9, 0.98), rgba(5, 5, 9, 1));
+        }
+
+        .content-theme .bg-white,
+        .content-theme [class*="bg-white"] {
+            background-color: #0d0d12 !important;
+            border-color: #1f2632 !important;
+        }
+
+        .content-theme .rounded-lg,
+        .content-theme .rounded-xl,
+        .content-theme .rounded-2xl {
+            border: 1px solid #1f2632;
+        }
+
+        .content-theme .text-gray-900,
+        .content-theme .text-gray-800,
+        .content-theme .text-slate-900,
+        .content-theme .text-slate-800 {
+            color: #f1f5f9 !important;
+        }
+
+        .content-theme .text-gray-700,
+        .content-theme .text-gray-600,
+        .content-theme .text-slate-700,
+        .content-theme .text-slate-600 {
+            color: #cbd5e1 !important;
+        }
+
+        .content-theme .text-gray-500,
+        .content-theme .text-slate-500,
+        .content-theme .text-gray-400 {
+            color: #94a3b8 !important;
+        }
+
+        .content-theme .border-gray-200,
+        .content-theme .border-gray-300,
+        .content-theme .border-slate-200,
+        .content-theme .border-slate-300 {
+            border-color: #253041 !important;
+        }
+
+        .content-theme input,
+        .content-theme textarea,
+        .content-theme select {
+            background-color: rgba(14, 165, 233, 0.08) !important;
+            color: #f8fafc !important;
+            border-color: rgba(14, 165, 233, 0.28) !important;
+        }
+
+        .content-theme input::placeholder,
+        .content-theme textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        .content-theme input:focus,
+        .content-theme textarea:focus,
+        .content-theme select:focus {
+            outline: none;
+            border-color: rgba(14, 165, 233, 0.7) !important;
+        }
+
+        .content-theme button[class*="bg-blue"],
+        .content-theme a[class*="bg-blue"] {
+            background: rgba(14, 165, 233, 0.14) !important;
+            border: 1px solid rgba(14, 165, 233, 0.45) !important;
+            color: #7dd3fc !important;
+        }
+
+        .content-theme button[class*="bg-red"],
+        .content-theme a[class*="bg-red"] {
+            background: rgba(239, 68, 68, 0.14) !important;
+            border: 1px solid rgba(239, 68, 68, 0.45) !important;
+            color: #fda4af !important;
+        }
+
+        .content-theme button[class*="bg-gray"],
+        .content-theme a[class*="bg-gray"] {
+            background: rgba(148, 163, 184, 0.08) !important;
+            border: 1px solid rgba(148, 163, 184, 0.32) !important;
+            color: #cbd5e1 !important;
+        }
+
+        .content-theme .shadow,
+        .content-theme .shadow-md,
+        .content-theme .shadow-lg,
+        .content-theme .shadow-xl {
+            box-shadow: 0 8px 26px rgba(2, 6, 23, 0.55) !important;
+        }
+
+        .content-theme a[class*="text-blue"],
+        .content-theme .text-blue-600,
+        .content-theme .text-blue-700 {
+            color: #67e8f9 !important;
+        }
+
+        .content-theme a:hover,
+        .content-theme button:hover {
+            filter: brightness(1.08);
+        }
+
+        .content-theme .bg-green-50,
+        .content-theme .bg-green-100 {
+            background-color: rgba(34, 197, 94, 0.12) !important;
+        }
+
+        .content-theme .bg-red-50,
+        .content-theme .bg-red-100 {
+            background-color: rgba(239, 68, 68, 0.12) !important;
+        }
+
+        .content-theme .bg-orange-50,
+        .content-theme .bg-orange-100 {
+            background-color: rgba(249, 115, 22, 0.12) !important;
+        }
+
+        .content-theme .bg-purple-50,
+        .content-theme .bg-purple-100 {
+            background-color: rgba(168, 85, 247, 0.12) !important;
+        }
+
+        .content-theme .bg-blue-50,
+        .content-theme .bg-blue-100,
+        .content-theme .bg-slate-50,
+        .content-theme .bg-slate-100 {
+            background-color: rgba(14, 165, 233, 0.12) !important;
+        }
+
+        /* Artistic motion and spacing rhythm tokens */
+        @keyframes titleReveal {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+                letter-spacing: 0.02em;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                letter-spacing: 0;
+            }
+        }
+
+        @keyframes sectionFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .art-rhythm {
+            --rhythm-gap: var(--space-8);
+        }
+
+        .content-theme .mb-6 { margin-bottom: var(--space-6) !important; }
+        .content-theme .mb-8 { margin-bottom: var(--space-8) !important; }
+        .content-theme .mb-10 { margin-bottom: var(--space-10) !important; }
+
+        .content-theme .rounded-lg,
+        .content-theme .rounded-xl,
+        .content-theme .rounded-2xl {
+            border-radius: var(--radius-art) !important;
+        }
+
+        .content-theme .art-rhythm h1:first-of-type {
+            animation: titleReveal 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+
+        .content-theme .art-rhythm h2,
+        .content-theme .art-rhythm h3 {
+            animation: sectionFadeIn 420ms ease both;
+        }
+
+        .content-theme .art-rhythm h1,
+        .content-theme .art-rhythm h2,
+        .content-theme .art-rhythm h3 {
+            text-wrap: balance;
+        }
     </style>
 </head>
 <!-- OBSIDIAN FORENSIC THEME: Deep black background, clinical precision, no decorative shadows -->
@@ -287,8 +482,8 @@
             </header>
             
             <!-- PAGE CONTENT - HIGH-DENSITY GRID -->
-            <main class="flex-1 overflow-auto" style="background-color: var(--obsidian);">
-                <div class="p-6">
+            <main class="flex-1 overflow-auto content-theme" style="background-color: var(--obsidian);">
+                <div class="p-6 art-rhythm">
                     <!-- Alert Messages -->
                     @if ($errors->any())
                         <div class="grid-panel p-4 mb-6 border-red-600/50">
