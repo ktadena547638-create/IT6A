@@ -125,7 +125,7 @@
                                 </td>
 
                                 <!-- Due Date -->
-                                <td class="px-4 py-3 text-sm font-mono {{ $task->due_date?.isPast() && $task->status !== 'completed' ? 'text-red-400' : 'text-gray-400' }}">
+                                <td class="px-4 py-3 text-sm font-mono {{ ($task->due_date && $task->due_date->isPast() && $task->status !== 'completed') ? 'text-red-400' : 'text-gray-400' }}">
                                     @if($task->due_date)
                                         {{ $task->due_date->format('M d, Y') }}
                                     @else

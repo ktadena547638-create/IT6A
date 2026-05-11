@@ -169,25 +169,25 @@
                 <div class="flex-1"></div>
                 
                 <!-- User Profile Section -->
-                <div class="border-t" style="border-color: #1e1e28; padding: 8px;">
-                    <div class="icon-button group relative">
+                <div class="border-t" style="border-color: #1e1e28; padding: 8px;" x-data="{ open: false }" @click.away="open = false">
+                    <button @click="open = !open" class="icon-button w-full flex items-center justify-center">
                         <div class="w-6 h-6 rounded flex items-center justify-center accent-cyan text-xs font-bold">
                             {{ substr(auth()->user()->name, 0, 1) }}
                         </div>
                         <span class="icon-label">{{ auth()->user()->name }}</span>
-                        
-                        <!-- Dropdown menu on hover -->
-                        <div class="hidden group-hover:block absolute left-16 bottom-0 bg-carbon border" style="border-color: #1e1e28; border-radius: 4px; min-width: 160px; z-index: 50;">
-                            <a href="{{ route('profile.preferences') }}" class="block px-3 py-2 text-sm hover:bg-[#1e1e28] text-gray-300 transition">
-                                ⚙️ Preferences
-                            </a>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="block w-full text-left px-3 py-2 text-sm hover:bg-[#1e1e28] text-red-400 transition border-t" style="border-color: #1e1e28;">
-                                    🚪 Logout
-                                </button>
-                            </form>
-                        </div>
+                    </button>
+                    
+                    <!-- Dropdown menu -->
+                    <div x-show="open" class="absolute left-0 bottom-16 w-48 bg-[#0d0d12] border border-[#1e1e28] rounded shadow-lg z-50" style="box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);">
+                        <a href="{{ route('profile.preferences') }}" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-gray-300 transition border-b" style="border-color: #1e1e28;">
+                            ⚙️ Preferences
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="block">
+                            @csrf
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-red-400 transition">
+                                🚪 Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -200,7 +200,7 @@
                 <div class="px-6 py-4 flex items-center justify-between">
                     <h1 class="text-lg font-medium accent-cyan">@yield('page-title', 'Dashboard')</h1>
                     
-                    <!-- Right side: Notifications + Search -->
+                    <!-- Right side: Notifications + User Menu -->
                     <div class="flex items-center gap-6">
                         <!-- Notifications -->
                         <div class="relative" x-data="{ open: false }" @click.away="open = false">
@@ -211,10 +211,29 @@
                             </button>
                         </div>
                         
-                        <!-- User menu -->
-                        <div class="text-right text-sm">
-                            <p class="font-medium">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
+                        <!-- User menu dropdown -->
+                        <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                            <button @click="open = !open" class="flex items-center gap-2 p-2 hover:bg-[#1e1e28] rounded transition">
+                                <div class="text-right text-sm">
+                                    <p class="font-medium text-white">{{ auth()->user()->name }}</p>
+                                    <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                </svg>
+                            </button>
+                            <!-- Dropdown -->
+                            <div x-show="open" class="absolute right-0 mt-2 w-48 bg-[#0d0d12] border border-[#1e1e28] rounded shadow-lg z-50" style="box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);">
+                                <a href="{{ route('profile.preferences') }}" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-gray-300 transition border-b" style="border-color: #1e1e28;">
+                                    ⚙️ Preferences
+                                </a>
+                                <form method="POST" action="{{ route('logout') }}" class="block">
+                                    @csrf
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm hover:bg-[#1e1e28] text-red-400 transition">
+                                        🚪 Logout
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
