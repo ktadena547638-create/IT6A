@@ -31,6 +31,7 @@ RUN apk add --no-cache \
         $PHPIZE_DEPS \
         bash \
         curl \
+    freetype-dev \
         gettext \
         icu-dev \
         libjpeg-turbo-dev \
