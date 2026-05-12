@@ -115,7 +115,7 @@ class Task extends Model
      */
     public function scopeOrderByPriority($query)
     {
-        return $query->orderByRaw("FIELD(priority, 'high', 'medium', 'low')");
+        return $query->orderByRaw("CASE LOWER(priority) WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END");
     }
 
     /**

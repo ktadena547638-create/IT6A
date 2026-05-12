@@ -185,8 +185,8 @@ class ProjectService
                 ->where('project_id', $projectId)
                 ->selectRaw('
                     COUNT(*) as total,
-                    SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
-                    SUM(CASE WHEN due_date < NOW() AND status != "completed" THEN 1 ELSE 0 END) as overdue
+                    SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN due_date < NOW() AND status != \'completed\' THEN 1 ELSE 0 END) as overdue
                 ')
                 ->first();
 

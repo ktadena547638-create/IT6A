@@ -67,8 +67,8 @@ class ProjectController extends Controller
                 }
             } else {
                 // Default: critical projects first
-                $query->orderByRaw("FIELD(priority, 'critical', 'high', 'medium', 'low')")
-                      ->orderBy('due_date', 'asc');
+                $query->orderByRaw("CASE LOWER(priority) WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END")
+                    ->orderBy('due_date', 'asc');
             }
 
             $projects = $query->paginate(15);
