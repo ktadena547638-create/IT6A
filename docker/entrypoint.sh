@@ -69,4 +69,4 @@ fi
 envsubst '$PORT' < "$template" > /tmp/nginx.conf
 
 php-fpm -F &
-exec nginx -c /tmp/nginx.conf -g 'daemon off;'
+exec nginx -e /dev/stderr -c /tmp/nginx.conf -g 'daemon off;'
