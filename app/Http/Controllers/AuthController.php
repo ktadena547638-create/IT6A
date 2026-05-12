@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -34,17 +36,18 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // Determine if input is email or username
-        $loginField = filter_var($input['email'], FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
-        
-        // Attempt login with either email or username
-        $credentials = [
-            $loginField => $input['email'],
-            'password' => $input['password'],
-        ];
+        $identifier = trim($input['email']);
+        $identifierLower = strtolower($identifier);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $user = Auth::user();
+        // Use case-insensitive lookup across both name and email.
+        // This allows demo logins like "admin" even if stored as "Admin".
+        $user = User::query()
+            ->whereRaw('LOWER(email) = ?', [$identifierLower])
+            ->orWhereRaw('LOWER(name) = ?', [$identifierLower])
+            ->first();
+
+        if ($user && Hash::check($input['password'], $user->password)) {
+            Auth::login($user, $request->boolean('remember'));
             
             // ✅ CRITICAL: Check if email is verified before allowing login
             if (!$user->email_verified_at) {
