@@ -46,6 +46,12 @@ return new class extends Migration
             DB::statement("ALTER TABLE users_new RENAME TO users;");
             DB::statement("CREATE INDEX users_role_index ON users(role);");
             DB::statement("CREATE INDEX users_email_index ON users(email);");
+        } elseif (DB::getDriverName() === 'pgsql') {
+            // PostgreSQL: Add CHECK constraint if not exists
+            DB::statement("
+                ALTER TABLE users 
+                ADD CONSTRAINT users_role_check CHECK(role IN ('admin', 'project_manager', 'team_member', 'client'))
+            ");
         } else {
             // MySQL: Modify the enum
             Schema::table('users', function (Blueprint $table) {
@@ -88,6 +94,12 @@ return new class extends Migration
             DB::statement("ALTER TABLE users_new RENAME TO users;");
             DB::statement("CREATE INDEX users_role_index ON users(role);");
             DB::statement("CREATE INDEX users_email_index ON users(email);");
+        } elseif (DB::getDriverName() === 'pgsql') {
+            // PostgreSQL: Drop the CHECK constraint
+            DB::statement("
+                ALTER TABLE users 
+                DROP CONSTRAINT IF EXISTS users_role_check
+            ");
         } else {
             Schema::table('users', function (Blueprint $table) {
                 $table->enum('role', ['admin', 'project_manager', 'team_member'])->change();
