@@ -7,6 +7,7 @@ trait TaskValidationRules
     /**
      * Get common task validation rules
      * ✅ Shared between Store and Update requests to eliminate duplication
+     * ✅ FIXED: Accept datetime-local format (Y-m-d\TH:i) from HTML5 input type
      */
     protected function getCommonTaskRules(): array
     {
@@ -17,7 +18,7 @@ trait TaskValidationRules
             'status' => 'required|in:pending,in_progress,completed',
             'priority' => 'required|in:low,medium,high,critical',
             'assigned_user_id' => 'nullable|integer|exists:users,id',
-            'due_date' => 'required|date_format:Y-m-d|after_or_equal:today',
+            'due_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:today',
         ];
     }
 
@@ -37,8 +38,8 @@ trait TaskValidationRules
             'status.in' => 'Status must be pending, in_progress, or completed',
             'assigned_user_id.exists' => 'Selected user does not exist in the system',
             'assigned_user_id.integer' => 'User ID must be a valid number',
-            'due_date.after' => 'Due date must be today or later',
-            'due_date.date' => 'Due date must be a valid date',
+            'due_date.after_or_equal' => 'Due date must be today or later',
+            'due_date.date_format' => 'Due date must be a valid date and time',
             'due_date.required' => 'Due date is required',
         ];
     }
