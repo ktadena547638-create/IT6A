@@ -24,7 +24,8 @@ class CheckRole
         }
 
         // Get user's role
-        $userRole = auth()->user()->role;
+        $userRole = strtolower(trim((string) auth()->user()->role));
+        $roles = array_map(fn ($role) => strtolower(trim((string) $role)), $roles);
 
         // Check if user's role is in allowed roles
         if (!in_array($userRole, $roles, true)) {

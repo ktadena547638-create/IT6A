@@ -179,7 +179,7 @@ class ProjectController extends Controller
             Gate::authorize('update', $project);
             
             // ✅ SELECTIVE SCRYING: Only Project Managers appear in manager delegation dropdown
-            $managers = User::where('role', 'project_manager')
+            $managers = User::whereRaw('LOWER(role) = ?', ['project_manager'])
                 ->orderBy('name')
                 ->get(['id', 'name']);
             
@@ -206,7 +206,7 @@ class ProjectController extends Controller
                 // Validate manager_id if being changed (admin delegation)
                 if (isset($validated['manager_id'])) {
                     $manager = User::findOrFail($validated['manager_id']);
-                    if ($manager->role === 'admin' && !auth()->user()->isAdmin()) {
+                    if ($manager->isAdmin() && !auth()->user()->isAdmin()) {
                         throw new \Exception('Cannot assign admin users as project managers.');
                     }
                 }

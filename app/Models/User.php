@@ -54,7 +54,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return strtolower(trim((string) $this->role)) === 'admin';
     }
 
     /**
@@ -62,7 +62,7 @@ class User extends Authenticatable
      */
     public function isProjectManager(): bool
     {
-        return $this->role === 'project_manager';
+        return strtolower(trim((string) $this->role)) === 'project_manager';
     }
 
     /**
@@ -70,7 +70,7 @@ class User extends Authenticatable
      */
     public function isTeamMember(): bool
     {
-        return $this->role === 'team_member';
+        return strtolower(trim((string) $this->role)) === 'team_member';
     }
 
     /**
@@ -78,7 +78,7 @@ class User extends Authenticatable
      */
     public function isClient(): bool
     {
-        return $this->role === 'client';
+        return strtolower(trim((string) $this->role)) === 'client';
     }
 
     /**
@@ -86,7 +86,7 @@ class User extends Authenticatable
      */
     public function hasRole($role): bool
     {
-        return $this->role === $role;
+        return strtolower(trim((string) $this->role)) === strtolower(trim((string) $role));
     }
 
     // ✅ RELATIONSHIPS FOR ROLE-BASED ACCESS
