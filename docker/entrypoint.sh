@@ -17,6 +17,11 @@ echo "[BOOT] DATABASE_URL=${DATABASE_URL:-not set}"
 
 db_url="${DB_URL:-${DATABASE_URL:-}}"
 
+if [ -n "$db_url" ]; then
+    db_host=$(echo "$db_url" | sed -E 's|.*://[^@]*@([^/:]+).*|\1|')
+    echo "[BOOT] Extracted DB_HOST from URL: $db_host"
+fi
+
 if [ -z "$db_url" ]; then
     echo "[BOOT] ✗ ERROR: No database URL found" >&2
     echo "[BOOT] ACTION: Set DB_URL in Render Environment" >&2
