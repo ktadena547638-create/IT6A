@@ -56,7 +56,17 @@ php artisan view:cache
 
 echo "[BOOT] ✓ Starting nginx + php-fpm on port 8080..."
 export PORT="${PORT:-8080}"
-envsubst '$PORT' < /tmp/nginx.conf.template > /tmp/nginx.conf
+template=""
+if [ -f /etc/nginx/nginx.conf.template ]; then
+    template=/etc/nginx/nginx.conf.template
+elif [ -f /tmp/nginx.conf.template ]; then
+    template=/tmp/nginx.conf.template
+else
+    echo "[BOOT] ✗ ERROR: can't find nginx.conf.template in /etc/nginx or /tmp" >&2
+    exit 1
+fi
+
+envsubst '$PORT' < "$template" > /tmp/nginx.conf
 
 php-fpm -F &
 exec nginx -c /tmp/nginx.conf -g 'daemon off;'
