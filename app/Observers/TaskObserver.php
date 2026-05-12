@@ -70,7 +70,7 @@ class TaskObserver
             TaskActivity::create([
                 'task_id' => $task->id,
                 'user_id' => auth()->id(),
-                'activity_type' => 'updated',
+                'activity_type' => 'status_changed',
                 'description' => $description,
             ]);
 
@@ -111,18 +111,12 @@ class TaskObserver
             // ✅ CRITICAL FIX: Verify and explicitly handle cascade deletion of related records
             // Database has FK cascadeOnDelete, but verify it executed
             try {
-                // Log deletion for audit
-                TaskActivity::create([
-                    'task_id' => $task->id,
-                    'user_id' => auth()->id(),
-                    'activity_type' => 'deleted',
-                    'description' => "Task '{$task->title}' was deleted",
-                ]);
+                // Log deletion for audit (skip if task already cascaded deleted)
+                // Don't try to create activity log on delete - cascade may have already removed it
+                Log::info('Task deleted', ['task_id' => $task->id, 'title' => $task->title, 'deleted_by' => auth()->id()]);
             } catch (\Exception $e) {
-                // If task activity fails but task is already deleted, this is expected
-                if (!str_contains($e->getMessage(), 'foreign key')) {
-                    throw $e; // Re-throw non-FK errors
-                }
+                // Silent fail on deletion logging
+                Log::warning('Task deletion audit logging failed', ['task_id' => $task->id, 'error' => $e->getMessage()]);
             }
         } catch (Exception $e) {
             Log::error('TaskObserver::deleted failed', [
@@ -148,7 +142,7 @@ class TaskObserver
             TaskActivity::create([
                 'task_id' => $task->id,
                 'user_id' => auth()->id(),
-                'activity_type' => 'restored',
+                'activity_type' => 'status_changed',
                 'description' => "Task '{$task->title}' was restored",
             ]);
         } catch (Exception $e) {
