@@ -25,10 +25,148 @@ return new class extends Migration
     
     public function up(): void
     {
+        $driver = DB::getDriverName();
+
+        if ($driver === 'pgsql') {
+            $this->createPostgreSQLTriggers();
+        } else {
+            $this->createMySQLTriggers();
+        }
+    }
+
+    private function createPostgreSQLTriggers(): void
+    {
+        // TRIGGER 1: ACTIVE DEFENSE - Prevent deletion of active/critical projects
+        DB::unprepared("
+            CREATE OR REPLACE FUNCTION prevent_active_project_deletion()
+            RETURNS TRIGGER AS \$\$
+            BEGIN
+                IF OLD.status IN ('active', 'planning') OR OLD.priority = 'critical' THEN
+                    RAISE EXCEPTION 'DATABASE INTEGRITY VIOLATION: Cannot delete projects with active/critical status. Deactivate project first.';
+                END IF;
+                RETURN OLD;
+            END;
+            \$\$ LANGUAGE plpgsql;
+        ");
+
+        DB::unprepared("
+            DROP TRIGGER IF EXISTS prevent_active_project_deletion ON projects;
+            CREATE TRIGGER prevent_active_project_deletion
+            BEFORE DELETE ON projects
+            FOR EACH ROW
+            EXECUTE FUNCTION prevent_active_project_deletion();
+        ");
+
+        // TRIGGER 2: STATE SYNCHRONIZATION - Auto-complete project when all tasks done
+        DB::unprepared("
+            CREATE OR REPLACE FUNCTION auto_complete_project_on_tasks_done()
+            RETURNS TRIGGER AS \$\$
+            DECLARE
+                total_tasks INT;
+                completed_tasks INT;
+            BEGIN
+                IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+                    SELECT COUNT(*) INTO total_tasks
+                    FROM tasks
+                    WHERE project_id = NEW.project_id 
+                        AND status != 'cancelled';
+                    
+                    SELECT COUNT(*) INTO completed_tasks
+                    FROM tasks
+                    WHERE project_id = NEW.project_id 
+                        AND status = 'completed';
+                    
+                    IF total_tasks > 0 AND completed_tasks = total_tasks THEN
+                        UPDATE projects 
+                        SET status = 'completed', updated_at = NOW()
+                        WHERE id = NEW.project_id
+                            AND status != 'completed';
+                    END IF;
+                END IF;
+                RETURN NEW;
+            END;
+            \$\$ LANGUAGE plpgsql;
+        ");
+
+        DB::unprepared("
+            DROP TRIGGER IF EXISTS auto_complete_project_on_tasks_done ON tasks;
+            CREATE TRIGGER auto_complete_project_on_tasks_done
+            AFTER UPDATE ON tasks
+            FOR EACH ROW
+            EXECUTE FUNCTION auto_complete_project_on_tasks_done();
+        ");
+
+        // TRIGGER 3: PRIORITY HEATMAP - Prevent critical task overload
+        DB::unprepared("
+            CREATE OR REPLACE FUNCTION prevent_critical_overload()
+            RETURNS TRIGGER AS \$\$
+            DECLARE
+                critical_count INT;
+            BEGIN
+                IF NEW.priority = 'critical' AND NEW.assigned_user_id IS NOT NULL THEN
+                    SELECT COUNT(*)
+                    INTO critical_count
+                    FROM tasks
+                    WHERE assigned_user_id = NEW.assigned_user_id
+                        AND priority = 'critical'
+                        AND status IN ('pending', 'in_progress', 'on_hold');
+                    
+                    IF critical_count >= 5 THEN
+                        RAISE EXCEPTION 'CAPACITY LIMIT EXCEEDED: User already has 5+ critical priority tasks. Cannot assign more until tasks are completed.';
+                    END IF;
+                END IF;
+                RETURN NEW;
+            END;
+            \$\$ LANGUAGE plpgsql;
+        ");
+
+        DB::unprepared("
+            DROP TRIGGER IF EXISTS prevent_critical_overload ON tasks;
+            CREATE TRIGGER prevent_critical_overload
+            BEFORE INSERT ON tasks
+            FOR EACH ROW
+            EXECUTE FUNCTION prevent_critical_overload();
+        ");
+
+        // TRIGGER 4: PREVENT CRITICAL OVERLOAD ON UPDATE
+        DB::unprepared("
+            CREATE OR REPLACE FUNCTION prevent_critical_overload_on_update()
+            RETURNS TRIGGER AS \$\$
+            DECLARE
+                critical_count INT;
+            BEGIN
+                IF (NEW.priority = 'critical' AND OLD.priority != 'critical') 
+                    OR (NEW.assigned_user_id IS DISTINCT FROM OLD.assigned_user_id AND NEW.priority = 'critical' AND NEW.assigned_user_id IS NOT NULL) THEN
+                    
+                    SELECT COUNT(*)
+                    INTO critical_count
+                    FROM tasks
+                    WHERE assigned_user_id = NEW.assigned_user_id
+                        AND priority = 'critical'
+                        AND status IN ('pending', 'in_progress', 'on_hold')
+                        AND id != NEW.id;
+                    
+                    IF critical_count >= 5 THEN
+                        RAISE EXCEPTION 'CAPACITY LIMIT EXCEEDED: User already has 5+ critical priority tasks. Cannot assign more until tasks are completed.';
+                    END IF;
+                END IF;
+                RETURN NEW;
+            END;
+            \$\$ LANGUAGE plpgsql;
+        ");
+
+        DB::unprepared("
+            DROP TRIGGER IF EXISTS prevent_critical_overload_on_update ON tasks;
+            CREATE TRIGGER prevent_critical_overload_on_update
+            BEFORE UPDATE ON tasks
+            FOR EACH ROW
+            EXECUTE FUNCTION prevent_critical_overload_on_update();
+        ");
+    }
+
+    private function createMySQLTriggers(): void
+    {
         // ========== TRIGGER 1: ACTIVE DEFENSE ==========
-        // Prevents hard deletion of projects with active/critical status
-        // Protects "Sovereign" data from accidental DROP/DELETE
-        
         DB::unprepared('
             CREATE TRIGGER prevent_active_project_deletion
             BEFORE DELETE ON projects
@@ -42,10 +180,6 @@ return new class extends Migration
         ');
 
         // ========== TRIGGER 2: STATE SYNCHRONIZATION ==========
-        // Auto-completes parent Project when last Task transitions to completed
-        // Ensures Transactional Semantics across hierarchy
-        // Uses indexed lookups for 250ms performance ceiling
-        
         DB::unprepared('
             CREATE TRIGGER auto_complete_project_on_tasks_done
             AFTER UPDATE ON tasks
@@ -54,21 +188,17 @@ return new class extends Migration
                 DECLARE total_tasks INT;
                 DECLARE completed_tasks INT;
                 
-                -- Only process if status changed to completed
                 IF NEW.`status` = "completed" AND OLD.`status` != "completed" THEN
-                    -- Optimized: Count all non-cancelled tasks
                     SELECT COUNT(*) INTO total_tasks
                     FROM tasks
                     WHERE project_id = NEW.project_id 
                         AND `status` != "cancelled";
                     
-                    -- Count completed tasks
                     SELECT COUNT(*) INTO completed_tasks
                     FROM tasks
                     WHERE project_id = NEW.project_id 
                         AND `status` = "completed";
                     
-                    -- Auto-complete if all non-cancelled tasks are done
                     IF total_tasks > 0 AND completed_tasks = total_tasks THEN
                         UPDATE projects 
                         SET `status` = "completed", updated_at = NOW()
@@ -80,10 +210,6 @@ return new class extends Migration
         ');
 
         // ========== TRIGGER 3: PRIORITY HEATMAP SAFEGUARD ==========
-        // Enforces capacity limits: Max 5 "critical" priority tasks per user
-        // SaaS-grade workload balancing at the data layer
-        // Prevents "Operational Entropy"
-        
         DB::unprepared('
             CREATE TRIGGER prevent_critical_overload
             BEFORE INSERT ON tasks
@@ -91,7 +217,6 @@ return new class extends Migration
             BEGIN
                 DECLARE critical_count INT;
                 
-                -- Check capacity only if task is critical and assigned
                 IF NEW.priority = "critical" AND NEW.assigned_user_id IS NOT NULL THEN
                     SELECT COUNT(*)
                     INTO critical_count
@@ -108,7 +233,6 @@ return new class extends Migration
             END
         ');
 
-        // Also handle UPDATE case for reassignment of critical tasks
         DB::unprepared('
             CREATE TRIGGER prevent_critical_overload_on_update
             BEFORE UPDATE ON tasks
@@ -116,9 +240,6 @@ return new class extends Migration
             BEGIN
                 DECLARE critical_count INT;
                 
-                -- Check capacity if:
-                -- 1. Priority is changing to critical OR
-                -- 2. Assignment is changing AND priority is critical
                 IF (NEW.priority = "critical" AND OLD.priority != "critical") 
                     OR (NEW.assigned_user_id != OLD.assigned_user_id AND NEW.priority = "critical" AND NEW.assigned_user_id IS NOT NULL) THEN
                     
@@ -128,7 +249,7 @@ return new class extends Migration
                     WHERE assigned_user_id = NEW.assigned_user_id
                         AND priority = "critical"
                         AND status IN ("pending", "in_progress", "on_hold")
-                        AND id != NEW.id;  -- Exclude current task
+                        AND id != NEW.id;
                     
                     IF critical_count >= 5 THEN
                         SIGNAL SQLSTATE "45000"
@@ -141,10 +262,25 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Drop triggers in reverse order (dependencies first)
-        DB::unprepared('DROP TRIGGER IF EXISTS prevent_critical_overload_on_update');
-        DB::unprepared('DROP TRIGGER IF EXISTS prevent_critical_overload');
-        DB::unprepared('DROP TRIGGER IF EXISTS auto_complete_project_on_tasks_done');
-        DB::unprepared('DROP TRIGGER IF EXISTS prevent_active_project_deletion');
+        $driver = DB::getDriverName();
+
+        if ($driver === 'pgsql') {
+            // PostgreSQL: Drop functions and triggers
+            DB::unprepared('DROP TRIGGER IF EXISTS prevent_critical_overload_on_update ON tasks');
+            DB::unprepared('DROP TRIGGER IF EXISTS prevent_critical_overload ON tasks');
+            DB::unprepared('DROP TRIGGER IF EXISTS auto_complete_project_on_tasks_done ON tasks');
+            DB::unprepared('DROP TRIGGER IF EXISTS prevent_active_project_deletion ON projects');
+            
+            DB::unprepared('DROP FUNCTION IF EXISTS prevent_critical_overload_on_update()');
+            DB::unprepared('DROP FUNCTION IF EXISTS prevent_critical_overload()');
+            DB::unprepared('DROP FUNCTION IF EXISTS auto_complete_project_on_tasks_done()');
+            DB::unprepared('DROP FUNCTION IF EXISTS prevent_active_project_deletion()');
+        } else {
+            // MySQL: Drop triggers
+            DB::unprepared('DROP TRIGGER IF EXISTS prevent_critical_overload_on_update');
+            DB::unprepared('DROP TRIGGER IF EXISTS prevent_critical_overload');
+            DB::unprepared('DROP TRIGGER IF EXISTS auto_complete_project_on_tasks_done');
+            DB::unprepared('DROP TRIGGER IF EXISTS prevent_active_project_deletion');
+        }
     }
 };
