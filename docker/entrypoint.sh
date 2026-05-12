@@ -4,11 +4,13 @@ set -eu
 cd /var/www/html
 
 if [ -z "${APP_KEY:-}" ]; then
-    echo "APP_KEY must be set in Render before the container starts." >&2
+    echo "[BOOT] ✗ ERROR: APP_KEY is not set" >&2
+    echo "[BOOT] ACTION: Set APP_KEY in Render Environment" >&2
     exit 1
 fi
 
-echo "[BOOT] APP_ENV=$APP_ENV"
+echo "[BOOT] ✓ APP_KEY is set"
+echo "[BOOT] APP_ENV=${APP_ENV:-not set}"
 echo "[BOOT] DB_CONNECTION=${DB_CONNECTION:-not set}"
 echo "[BOOT] DB_URL=${DB_URL:-not set}"
 echo "[BOOT] DATABASE_URL=${DATABASE_URL:-not set}"
@@ -16,36 +18,38 @@ echo "[BOOT] DATABASE_URL=${DATABASE_URL:-not set}"
 db_url="${DB_URL:-${DATABASE_URL:-}}"
 
 if [ -z "$db_url" ]; then
-    echo "[BOOT] ERROR: No database URL found. Cannot proceed." >&2
-    echo "[BOOT] Render must provide DB_URL or DATABASE_URL via render.yaml fromDatabase" >&2
+    echo "[BOOT] ✗ ERROR: No database URL found" >&2
+    echo "[BOOT] ACTION: Set DB_URL in Render Environment" >&2
     exit 1
 fi
 
-echo "[BOOT] Found database URL, forcing pgsql"
+echo "[BOOT] ✓ Found database URL, forcing pgsql"
 export DB_URL="$db_url"
 export DATABASE_URL="$db_url"
 export DB_CONNECTION=pgsql
 export DB_PORT="${DB_PORT:-5432}"
+export DB_SSLMODE="${DB_SSLMODE:-require}"
 
-echo "[BOOT] Final DB_CONNECTION=$DB_CONNECTION DB_PORT=$DB_PORT"
-
-php artisan config:cache
+echo "[BOOT] ✓ DB_CONNECTION=pgsql | DB_PORT=5432"
+echo "[BOOT] ✓ Running php artisan config:cache..."
 
 attempt=1
 until php artisan migrate --force; do
     if [ "$attempt" -ge 10 ]; then
-        echo "Database migrations failed after 10 attempts." >&2
+        echo "[BOOT] ✗ Database migrations failed after 10 attempts." >&2
         exit 1
     fi
 
-    echo "Waiting for the database to become available..."
+    echo "[BOOT] Retry $attempt/10: Waiting for database..."
     attempt=$((attempt + 1))
     sleep 3
 done
 
-php artisan route:cache
+echo "[BOOT] ✓ Migrations complete"
+echo "[BOOT] ✓ Caching routes..."
 php artisan view:cache
 
+echo "[BOOT] ✓ Starting nginx + php-fpm on port 8080..."
 export PORT="${PORT:-8080}"
 envsubst '$PORT' < /tmp/nginx.conf.template > /tmp/nginx.conf
 
