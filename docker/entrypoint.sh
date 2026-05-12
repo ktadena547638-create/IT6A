@@ -69,4 +69,19 @@ fi
 envsubst '$PORT' < "$template" > /tmp/nginx.conf
 
 php-fpm -F &
+fpm_ready=0
+for i in 1 2 3 4 5 6 7 8 9 10; do
+    if php -r '$s=@fsockopen("127.0.0.1",9000,$e,$m,1); if($s){fclose($s); exit(0);} exit(1);'; then
+        fpm_ready=1
+        break
+    fi
+    echo "[BOOT] Waiting for php-fpm to accept connections... ($i/10)"
+    sleep 1
+done
+
+if [ "$fpm_ready" -ne 1 ]; then
+    echo "[BOOT] ✗ ERROR: php-fpm did not become ready in time" >&2
+    exit 1
+fi
+
 exec nginx -e /dev/stderr -c /tmp/nginx.conf -g 'daemon off;'
