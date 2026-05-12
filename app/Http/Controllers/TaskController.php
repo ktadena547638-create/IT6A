@@ -216,8 +216,30 @@ class TaskController extends Controller
                 Gate::authorize('update', $task);
             }
             
-            DB::transaction(function () use ($request, $task) {
-                $this->taskService->updateTask($task->id, $request->validated());
+            // Prepare validated data and run pre-checks to provide clearer errors for FK issues
+            $validated = $request->validated();
+
+            // If this is a full update (not status-only), ensure referenced project and user actually exist
+            if (! $isStatusOnlyUpdate) {
+                if (isset($validated['project_id'])) {
+                    $proj = Project::find($validated['project_id']);
+                    if (! $proj) {
+                        Log::warning('Task update failed - project missing', ['project_id' => $validated['project_id'], 'task_id' => $task->id, 'user_id' => auth()->id()]);
+                        return redirect()->back()->withInput()->with('error', 'Selected project does not exist. Check your inputs.');
+                    }
+                }
+
+                if (array_key_exists('assigned_user_id', $validated) && $validated['assigned_user_id']) {
+                    $assignee = User::find($validated['assigned_user_id']);
+                    if (! $assignee) {
+                        Log::warning('Task update failed - assigned user missing', ['assigned_user_id' => $validated['assigned_user_id'], 'task_id' => $task->id, 'user_id' => auth()->id()]);
+                        return redirect()->back()->withInput()->with('error', 'Selected user does not exist. Check your inputs.');
+                    }
+                }
+            }
+
+            DB::transaction(function () use ($validated, $task) {
+                $this->taskService->updateTask($task->id, $validated);
             });
 
             // Support both form submission and AJAX requests
