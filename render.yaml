@@ -8,6 +8,8 @@ services:
     envVars:
       - key: APP_NAME
         value: TaskFlow
+      - key: APP_URL
+        value: https://it9al.onrender.com
       - key: APP_ENV
         value: production
       - key: APP_DEBUG

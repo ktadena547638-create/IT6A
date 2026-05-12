@@ -89,7 +89,7 @@ class ProjectController extends Controller
         try {
             Gate::authorize('create', Project::class);
             // Filter to only show Project Managers (not admins, not team members)
-            $managers = User::where('role', 'project_manager')->get();
+            $managers = User::whereRaw('LOWER(role) = ?', ['project_manager'])->get();
             return view('projects.create', compact('managers'));
         } catch (Exception $e) {
             Log::error('Failed to load project creation form', ['error' => $e->getMessage()]);
