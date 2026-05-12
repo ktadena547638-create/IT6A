@@ -18,7 +18,7 @@ trait TaskValidationRules
             'status' => 'required|in:pending,in_progress,completed',
             'priority' => 'required|in:low,medium,high,critical',
             'assigned_user_id' => 'nullable|integer|exists:users,id',
-            'due_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:today',
+            'due_date' => 'required|date_format:Y-m-d\TH:i',
         ];
     }
 
@@ -38,7 +38,7 @@ trait TaskValidationRules
             'status.in' => 'Status must be pending, in_progress, or completed',
             'assigned_user_id.exists' => 'Selected user does not exist in the system',
             'assigned_user_id.integer' => 'User ID must be a valid number',
-            'due_date.after_or_equal' => 'Due date must be today or later',
+            // 'due_date.after_or_equal' removed - allow all valid dates
             'due_date.date_format' => 'Due date must be a valid date and time',
             'due_date.required' => 'Due date is required',
         ];

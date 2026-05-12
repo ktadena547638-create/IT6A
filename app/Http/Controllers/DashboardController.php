@@ -36,16 +36,22 @@ class DashboardController extends Controller
 
             // ✅ PERFORMANCE: Cache project count (TTL: 5 minutes)
             $projectCount = Cache::remember($cacheKeyPrefix . '_project_count', $cacheTTL, function () use ($user) {
-                return Project::where('manager_id', $user->id)->count();
+                $query = Project::query();
+                if (!$user->isAdmin()) {
+                    $query->where('manager_id', $user->id);
+                }
+                return $query->count();
             });
             
             // ✅ PERFORMANCE: Cache user projects with health_score calculation (TTL: 5 minutes)
             // CRITICAL FIX: Health scores calculated via database aggregation to prevent N+1 and ensure View safety
             $userProjects = Cache::remember($cacheKeyPrefix . '_user_projects', $cacheTTL, function () use ($user) {
-                $projects = Project::select(['id', 'name', 'description', 'status', 'manager_id', 'updated_at'])
-                    ->with(['manager:id,name', 'tasks:id,project_id,status'])
-                    ->where('manager_id', $user->id)
-                    ->orderBy('updated_at', 'desc')
+                $query = Project::select(['id', 'name', 'description', 'status', 'manager_id', 'updated_at'])
+                    ->with(['manager:id,name', 'tasks:id,project_id,status']);
+                if (!$user->isAdmin()) {
+                    $query->where('manager_id', $user->id);
+                }
+                $projects = $query->orderBy('updated_at', 'desc')
                     ->limit(5)
                     ->get();
 
@@ -88,10 +94,12 @@ class DashboardController extends Controller
 
             // ✅ PERFORMANCE: Cache user tasks with relationships (TTL: 5 minutes)
             $userTasks = Cache::remember($cacheKeyPrefix . '_user_tasks', $cacheTTL, function () use ($user) {
-                return Task::select(['id', 'project_id', 'title', 'status', 'priority', 'due_date', 'created_by', 'created_at'])
-                    ->with(['project:id,name', 'creator:id,name', 'assignedUser:id,name'])
-                    ->where('assigned_user_id', $user->id)
-                    ->orderBy('due_date', 'asc')
+                $query = Task::select(['id', 'project_id', 'title', 'status', 'priority', 'due_date', 'created_by', 'created_at'])
+                    ->with(['project:id,name', 'creator:id,name', 'assignedUser:id,name']);
+                if (!$user->isAdmin()) {
+                    $query->where('assigned_user_id', $user->id);
+                }
+                return $query->orderBy('due_date', 'asc')
                     ->get()
                     ->toArray();
             });
@@ -116,21 +124,29 @@ class DashboardController extends Controller
             // ✅ PERFORMANCE: Cache priority breakdown - FILTERED BY USER ACCESS
             // ✅ CRITICAL FIX: Count PROJECTS by priority instead of tasks
             $projectsByPriority = Cache::remember($cacheKeyPrefix . '_projects_priority_breakdown', $cacheTTL, function () use ($user) {
+                $query = Project::query();
+                if (!$user->isAdmin()) {
+                    $query->where('manager_id', $user->id);
+                }
                 return [
-                    'critical' => Project::where('manager_id', $user->id)->where('priority', 'critical')->count(),
-                    'high' => Project::where('manager_id', $user->id)->where('priority', 'high')->count(),
-                    'medium' => Project::where('manager_id', $user->id)->where('priority', 'medium')->count(),
-                    'low' => Project::where('manager_id', $user->id)->where('priority', 'low')->count(),
+                    'critical' => (clone $query)->where('priority', 'critical')->count(),
+                    'high' => (clone $query)->where('priority', 'high')->count(),
+                    'medium' => (clone $query)->where('priority', 'medium')->count(),
+                    'low' => (clone $query)->where('priority', 'low')->count(),
                 ];
             });
             
             // ✅ PERFORMANCE: Cache task priority breakdown - User's assigned tasks
             $tasksByPriority = Cache::remember($cacheKeyPrefix . '_tasks_priority_breakdown', $cacheTTL, function () use ($user) {
+                $query = Task::query();
+                if (!$user->isAdmin()) {
+                    $query->where('assigned_user_id', $user->id);
+                }
                 return [
-                    'critical' => Task::where('assigned_user_id', $user->id)->where('priority', 'critical')->count(),
-                    'high' => Task::where('assigned_user_id', $user->id)->where('priority', 'high')->count(),
-                    'medium' => Task::where('assigned_user_id', $user->id)->where('priority', 'medium')->count(),
-                    'low' => Task::where('assigned_user_id', $user->id)->where('priority', 'low')->count(),
+                    'critical' => (clone $query)->where('priority', 'critical')->count(),
+                    'high' => (clone $query)->where('priority', 'high')->count(),
+                    'medium' => (clone $query)->where('priority', 'medium')->count(),
+                    'low' => (clone $query)->where('priority', 'low')->count(),
                 ];
             });
 
