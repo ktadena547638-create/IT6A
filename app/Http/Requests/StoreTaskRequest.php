@@ -35,4 +35,20 @@ class StoreTaskRequest extends FormRequest
     {
         return $this->getCommonMessages();
     }
+
+    /**
+     * Normalize common due_date formats before validation.
+     * Accepts dd/mm/YYYY or dd-mm-YYYY and converts to Y-m-d H:i:s
+     */
+    protected function prepareForValidation(): void
+    {
+        $due = $this->input('due_date');
+        if (! $due) {
+            return;
+        }
+
+        $this->merge([
+            'due_date' => $this->normalizeDueDateValue((string) $due),
+        ]);
+    }
 }

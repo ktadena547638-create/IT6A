@@ -122,8 +122,8 @@
 
             <div>
                 <label for="due_date" class="block text-sm font-semibold text-cyan-400 mb-3 uppercase tracking-wider">Due Date</label>
-                <input type="date" id="due_date" name="due_date" value="{{ old('due_date') }}"
-                       class="w-full px-4 py-3 rounded-lg border-2 transition @error('due_date') border-red-500 @else border-cyan-500/30 focus:border-cyan-500 @enderror" style="background-color: rgba(14, 165, 233, 0.05); color: #ffffff;">
+                          <input type="datetime-local" id="due_date" name="due_date" value="{{ old('due_date') ? \Carbon\Carbon::parse(old('due_date'))->format('Y-m-d\TH:i') : '' }}"
+                           class="w-full px-4 py-3 rounded-lg border-2 transition @error('due_date') border-red-500 @else border-cyan-500/30 focus:border-cyan-500 @enderror" style="background-color: rgba(14, 165, 233, 0.05); color: #ffffff;">
                 @error('due_date')
                     <p class="mt-2 text-sm text-red-400 flex items-center gap-1"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 14.586l-6.687-6.687a1 1 0 00-1.414 1.414l8.1 8.1a1 1 0 001.414 0l8.1-8.1z"/></svg>{{ $message }}</p>
                 @enderror
