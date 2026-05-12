@@ -51,6 +51,8 @@ until php artisan migrate --force; do
 done
 
 echo "[BOOT] ✓ Migrations complete"
+echo "[BOOT] ✓ Ensuring demo login users exist..."
+php artisan db:seed --class='Database\\Seeders\\DemoLoginSeeder' --force
 echo "[BOOT] ✓ Caching routes..."
 php artisan view:cache
 
