@@ -71,6 +71,8 @@ COPY docker/nginx.conf.template /tmp/nginx.conf.template
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
+    && chmod a+r /tmp/nginx.conf.template \
+    && chown www-data:www-data /tmp/nginx.conf.template \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R ug+rwX storage bootstrap/cache
 
