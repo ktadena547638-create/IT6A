@@ -232,19 +232,54 @@ class ProjectController extends Controller
     public function destroy(Project $project): RedirectResponse
     {
         try {
+            Log::info('Delete attempt initiated', [
+                'project_id' => $project->id,
+                'status' => $project->status,
+                'priority' => $project->priority,
+                'user_id' => auth()->id(),
+                'user_role' => auth()->user()?->role,
+            ]);
+
             Gate::authorize('delete', $project);
             
+            // Pre-check business rules to avoid DB trigger exceptions
+            if ($project->status === 'active' || strtolower($project->priority) === 'critical') {
+                Log::warning('Prevented delete attempt for protected project', [
+                    'project_id' => $project->id,
+                    'status' => $project->status,
+                    'priority' => $project->priority,
+                    'user_id' => auth()->id(),
+                ]);
+
+                return redirect()->back()
+                    ->withErrors(['error' => 'Cannot delete active or critical projects. Deactivate or lower priority first.']);
+            }
+
+            Log::info('Pre-checks passed, attempting database delete', [
+                'project_id' => $project->id,
+            ]);
+
             DB::transaction(function () use ($project) {
                 $this->projectService->deleteProject($project->id);
             });
             
+            Log::info('Project deleted successfully', [
+                'project_id' => $project->id,
+                'user_id' => auth()->id(),
+            ]);
+            
             return redirect()->route('projects.index')
                 ->with('success', 'Project deleted successfully.');
         } catch (Exception $e) {
-            Log::error('Project deletion failed', [
+            Log::error('Project deletion failed - detailed exception', [
                 'project_id' => $project->id,
                 'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
+                'exception_class' => get_class($e),
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
             
             return redirect()->back()
