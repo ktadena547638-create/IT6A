@@ -236,11 +236,15 @@ class TaskController extends Controller
                 'data' => $request->validated()
             ]);
 
+            // Surface the SQL error message briefly to help debugging (will be tightened later)
+            $userMessage = 'Associated project or user does not exist. Check your inputs.';
+            $debugDetails = substr($e->getMessage(), 0, 300);
+
             if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => 'Associated project or user does not exist. Check your inputs.'], 500);
+                return response()->json(['success' => false, 'message' => $userMessage, 'debug' => $debugDetails], 500);
             }
 
-            return redirect()->back()->withInput()->with('error', 'Associated project or user does not exist. Check your inputs.');
+            return redirect()->back()->withInput()->with('error', $userMessage . ' Debug: ' . $debugDetails);
         } catch (Exception $e) {
             Log::error('Task update failed', [
                 'task_id' => $task->id,
