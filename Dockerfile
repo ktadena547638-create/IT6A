@@ -58,8 +58,10 @@ RUN apk add --no-cache \
         /var/www/html/storage/framework/sessions \
         /var/www/html/storage/framework/views \
         /var/www/html/bootstrap/cache \
+        /var/lib/nginx/logs \
+        /var/lib/nginx/tmp \
         /tmp/nginx \
-    && chown -R www-data:www-data /var/www/html /tmp/nginx
+    && chown -R www-data:www-data /var/www/html /tmp/nginx /var/lib/nginx
 
 WORKDIR /var/www/html
 
