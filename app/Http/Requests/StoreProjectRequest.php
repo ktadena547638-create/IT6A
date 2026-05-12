@@ -23,6 +23,7 @@ class StoreProjectRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:projects',
             'description' => 'nullable|string|max:1000',
+            'manager_id' => 'required|exists:users,id',
             'priority' => 'nullable|in:low,medium,high,critical',
             'status' => 'required|in:planning,active,on_hold,completed,cancelled',
             'start_date' => 'required|date|before_or_equal:end_date',
@@ -65,6 +66,8 @@ class StoreProjectRequest extends FormRequest
             'name.required' => 'Project name is required',
             'name.unique' => 'A project with this name already exists',
             'name.max' => 'Project name cannot exceed 255 characters',
+            'manager_id.required' => 'Project manager is required',
+            'manager_id.exists' => 'Selected manager does not exist',
             'status.in' => 'Status must be planning, active, on_hold, or completed',
             'start_date.required' => 'Start date is required',
             'start_date.before_or_equal' => 'Start date must be before or equal to end date',

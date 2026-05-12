@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Events\ProjectMilestone;
 use App\Models\Project;
-use App\Models\TaskActivity;
+use Illuminate\Support\Facades\Log;
 
 class ProjectObserver
 {
@@ -14,29 +14,13 @@ class ProjectObserver
      */
     public function created(Project $project): void
     {
-        try {
-            if (!auth()->check()) {
-                return; // Skip if not authenticated
-            }
-
-            TaskActivity::create([
-                'task_id' => null,  // Project-level activity has no associated task
-                'user_id' => auth()->id(),
-                'activity_type' => 'project_created',
-                'description' => "Project '{$project->name}' was created",
-                'metadata' => json_encode([
-                    'project_id' => $project->id,
-                    'status' => $project->status,
-                    'due_date' => $project->due_date?->toDateString(),
-                ]),
-            ]);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Failed to log project creation activity', [
-                'project_id' => $project->id,
-                'error' => $e->getMessage(),
-            ]);
-            // Don't throw - activity logging is non-critical
-        }
+        Log::info('Project created', [
+            'project_id' => $project->id,
+            'name' => $project->name,
+            'status' => $project->status,
+            'manager_id' => $project->manager_id,
+            'created_by' => auth()->id(),
+        ]);
     }
 
     /**
@@ -46,38 +30,28 @@ class ProjectObserver
     public function updated(Project $project): void
     {
         try {
-            if (!auth()->check()) {
-                return; // Skip if not authenticated
-            }
-
             $changes = $project->getChanges();
             $changedFields = array_keys($changes);
 
             if (empty($changedFields)) {
-                return; // No actual changes
+                return;
             }
 
-            TaskActivity::create([
-                'task_id' => null,  // Project-level activity has no associated task
-                'user_id' => auth()->id(),
-                'activity_type' => 'project_updated',
-                'description' => "Project '{$project->name}' was updated. Changed: " . implode(', ', $changedFields),
-                'metadata' => json_encode([
-                    'project_id' => $project->id,
-                    'changed_fields' => $changedFields,
-                ]),
+            Log::info('Project updated', [
+                'project_id' => $project->id,
+                'name' => $project->name,
+                'changed_fields' => $changedFields,
+                'updated_by' => auth()->id(),
             ]);
 
-            // ✅ PROJECT MILESTONE: Dispatch event if client was just assigned
             if ($project->wasChanged('client_id') && $project->client_id) {
                 ProjectMilestone::dispatch($project);
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Failed to log project update activity', [
+            Log::warning('Failed to log project update activity', [
                 'project_id' => $project->id,
                 'error' => $e->getMessage(),
             ]);
-            // Don't throw - activity logging is non-critical
         }
     }
 
@@ -87,26 +61,10 @@ class ProjectObserver
      */
     public function deleted(Project $project): void
     {
-        try {
-            if (!auth()->check()) {
-                return; // Skip if not authenticated
-            }
-
-            TaskActivity::create([
-                'task_id' => null,  // Project-level activity has no associated task
-                'user_id' => auth()->id(),
-                'activity_type' => 'project_deleted',
-                'description' => "Project '{$project->name}' was deleted",
-                'metadata' => json_encode([
-                    'project_id' => $project->id,
-                ]),
-            ]);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Failed to log project deletion activity', [
-                'project_id' => $project->id,
-                'error' => $e->getMessage(),
-            ]);
-            // Don't throw - activity logging is non-critical
-        }
+        Log::info('Project deleted', [
+            'project_id' => $project->id,
+            'name' => $project->name,
+            'deleted_by' => auth()->id(),
+        ]);
     }
 }

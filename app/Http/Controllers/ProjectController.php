@@ -107,10 +107,6 @@ class ProjectController extends Controller
             Gate::authorize('create', Project::class);
 
             $projectData = $request->validated();
-            // Admin can assign to any manager via form; non-admins (soon to be disabled) would use their own ID
-            if (!isset($projectData['manager_id']) || empty($projectData['manager_id'])) {
-                $projectData['manager_id'] = auth()->id();
-            }
 
             Log::info('Creating project', [
                 'user_id' => auth()->id(),
