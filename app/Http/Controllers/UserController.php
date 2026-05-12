@@ -31,7 +31,7 @@ class UserController extends Controller
                     'clientProjects', 
                     'assignedTasks'
                 ])
-                ->orderByRaw("FIELD(role, 'admin', 'project_manager', 'team_member', 'client')")
+                ->orderByRaw("CASE LOWER(role) WHEN 'admin' THEN 0 WHEN 'project_manager' THEN 1 WHEN 'team_member' THEN 2 WHEN 'client' THEN 3 ELSE 4 END")
                 ->orderBy('name', 'asc')
                 ->paginate(20);
             
@@ -174,7 +174,7 @@ class UserController extends Controller
             }
             
             // Safety check: prevent deleting last admin
-            if ($user->isAdmin() && User::where('role', 'admin')->count() === 1) {
+            if ($user->isAdmin() && User::whereRaw('LOWER(role) = ?', ['admin'])->count() === 1) {
                 return redirect()->back()->with('error', 'Cannot delete the last admin account');
             }
             
