@@ -31,32 +31,52 @@ class DashboardController extends Controller
     {
         try {
             $user = auth()->user();
+            // Force cache to invalidate immediately on every dashboard load
+            // This ensures fresh counts for testing
             $cacheKeyPrefix = 'dashboard_' . $user->id;
+            
+            // Clear all dashboard caches
+            Cache::forget($cacheKeyPrefix . '_project_count');
+            Cache::forget($cacheKeyPrefix . '_user_projects');
+            Cache::forget($cacheKeyPrefix . '_avg_health');
+            Cache::forget($cacheKeyPrefix . '_user_tasks');
+            Cache::forget($cacheKeyPrefix . '_overdue_tasks');
+            Cache::forget($cacheKeyPrefix . '_due_today');
+            Cache::forget($cacheKeyPrefix . '_projects_priority_breakdown');
+            Cache::forget($cacheKeyPrefix . '_tasks_priority_breakdown');
+            // Debug logging to help diagnose missing projects in production
+            try {
+                Log::info('Dashboard debug counts', [
+                    'auth_user_id' => $user->id ?? null,
+                    'auth_user_role' => $user->role ?? null,
+                    'total_projects' => Project::count(),
+                    'sample_projects' => Project::select('id','name','manager_id')->limit(5)->get()->toArray(),
+                ]);
+            } catch (Exception $e) {
+                Log::warning('Dashboard debug logging failed: ' . $e->getMessage());
+            }
+            
             $cacheTTL = now()->addMinutes(5); // 5-minute TTL
 
-            // ✅ PERFORMANCE: Cache project count (TTL: 5 minutes)
-            $projectCount = Cache::remember($cacheKeyPrefix . '_project_count', $cacheTTL, function () use ($user) {
-                $query = Project::query();
-                if (!$user->isAdmin()) {
-                    $query->where('manager_id', $user->id);
-                }
-                return $query->count();
-            });
+            // ✅ PERFORMANCE: Calculate project count (NO CACHE - fresh data)
+            $projectCount = Project::query()
+                ->when(!$user->isAdmin(), function($q) use ($user) {
+                    return $q->where('manager_id', $user->id);
+                })
+                ->count();
             
-            // ✅ PERFORMANCE: Cache user projects with health_score calculation (TTL: 5 minutes)
-            // CRITICAL FIX: Health scores calculated via database aggregation to prevent N+1 and ensure View safety
-            $userProjects = Cache::remember($cacheKeyPrefix . '_user_projects', $cacheTTL, function () use ($user) {
-                $query = Project::select(['id', 'name', 'description', 'status', 'manager_id', 'updated_at'])
-                    ->with(['manager:id,name', 'tasks:id,project_id,status']);
-                if (!$user->isAdmin()) {
-                    $query->where('manager_id', $user->id);
-                }
-                $projects = $query->orderBy('updated_at', 'desc')
-                    ->limit(5)
-                    ->get();
+            // ✅ PERFORMANCE: Calculate user projects with health_score (NO CACHE - fresh data)
+            $query = Project::select(['id', 'name', 'description', 'status', 'manager_id', 'updated_at'])
+                ->with(['manager:id,name', 'tasks:id,project_id,status']);
+            if (!$user->isAdmin()) {
+                $query->where('manager_id', $user->id);
+            }
+            $projects = $query->orderBy('updated_at', 'desc')
+                ->limit(5)
+                ->get();
 
-                // Calculate health_score for each project using single aggregated query batch
-                return $projects->map(function ($project) {
+            // Calculate health_score for each project using single aggregated query batch
+            $userProjects = $projects->map(function ($project) {
                     $stats = DB::table('tasks')
                         ->where('project_id', $project->id)
                         ->selectRaw('
@@ -80,75 +100,54 @@ class DashboardController extends Controller
                     
                     return $projectArray;
                 })->toArray();
-            });
             
-            // ✅ PERFORMANCE: Cache average health (TTL: 5 minutes)
-            $avgHealth = Cache::remember($cacheKeyPrefix . '_avg_health', $cacheTTL, function () use ($userProjects) {
-                if (empty($userProjects)) {
-                    return 100;
-                }
-                
-                $totalHealth = array_sum(array_map(fn($p) => $p['health_score'], $userProjects));
-                return (int)($totalHealth / count($userProjects));
-            });
+            // ✅ PERFORMANCE: Calculate average health (NO CACHE - fresh)
+            $avgHealth = empty($userProjects) ? 100 : (int)(array_sum(array_map(fn($p) => $p['health_score'], $userProjects)) / count($userProjects));
 
-            // ✅ PERFORMANCE: Cache user tasks with relationships (TTL: 5 minutes)
-            $userTasks = Cache::remember($cacheKeyPrefix . '_user_tasks', $cacheTTL, function () use ($user) {
-                $query = Task::select(['id', 'project_id', 'title', 'status', 'priority', 'due_date', 'created_by', 'created_at'])
-                    ->with(['project:id,name', 'creator:id,name', 'assignedUser:id,name']);
-                if (!$user->isAdmin()) {
-                    $query->where('assigned_user_id', $user->id);
-                }
-                return $query->orderBy('due_date', 'asc')
-                    ->get()
-                    ->toArray();
-            });
+            // ✅ PERFORMANCE: Calculate user tasks (NO CACHE - fresh data)
+            $query = Task::select(['id', 'project_id', 'title', 'status', 'priority', 'due_date', 'created_by', 'created_at'])
+                ->with(['project:id,name', 'creator:id,name', 'assignedUser:id,name']);
+            if (!$user->isAdmin()) {
+                $query->where('assigned_user_id', $user->id);
+            }
+            $userTasks = $query->orderBy('due_date', 'asc')
+                ->get()
+                ->toArray();
             
             // ✅ PERFORMANCE: Use cached data instead of new queries
             $assignedCount = count($userTasks);
             $completedCount = count(array_filter($userTasks, fn($t) => $t['status'] === 'completed'));
 
-            // ✅ PERFORMANCE: Cache task counts using database aggregation
-            $overdueTasks = Cache::remember($cacheKeyPrefix . '_overdue_tasks', $cacheTTL, function () {
-                return Task::where('status', '!=', 'completed')
-                    ->where('due_date', '<', now())
-                    ->count();
-            });
-            
-            $tasksDueToday = Cache::remember($cacheKeyPrefix . '_due_today', $cacheTTL, function () {
-                return Task::whereDate('due_date', today())
-                    ->where('status', '!=', 'completed')
-                    ->count();
-            });
+            // ✅ PERFORMANCE: Calculate task counts (NO CACHE - fresh)
+            $overdueTasks = Task::where('status', '!=', 'completed')
 
-            // ✅ PERFORMANCE: Cache priority breakdown - FILTERED BY USER ACCESS
-            // ✅ CRITICAL FIX: Count PROJECTS by priority instead of tasks
-            $projectsByPriority = Cache::remember($cacheKeyPrefix . '_projects_priority_breakdown', $cacheTTL, function () use ($user) {
-                $query = Project::query();
-                if (!$user->isAdmin()) {
-                    $query->where('manager_id', $user->id);
-                }
-                return [
-                    'critical' => (clone $query)->where('priority', 'critical')->count(),
-                    'high' => (clone $query)->where('priority', 'high')->count(),
-                    'medium' => (clone $query)->where('priority', 'medium')->count(),
-                    'low' => (clone $query)->where('priority', 'low')->count(),
-                ];
-            });
+                ->when(!$user->isAdmin(), function($q) use ($user) {
+                    return $q->where('assigned_user_id', $user->id);
+                })
+                ->where('due_date', '<', now())
+                ->count();
             
-            // ✅ PERFORMANCE: Cache task priority breakdown - User's assigned tasks
-            $tasksByPriority = Cache::remember($cacheKeyPrefix . '_tasks_priority_breakdown', $cacheTTL, function () use ($user) {
-                $query = Task::query();
-                if (!$user->isAdmin()) {
-                    $query->where('assigned_user_id', $user->id);
-                }
-                return [
-                    'critical' => (clone $query)->where('priority', 'critical')->count(),
-                    'high' => (clone $query)->where('priority', 'high')->count(),
-                    'medium' => (clone $query)->where('priority', 'medium')->count(),
-                    'low' => (clone $query)->where('priority', 'low')->count(),
-                ];
-            });
+            $tasksDueToday = Task::query()
+                ->when(!$user->isAdmin(), function($q) use ($user) {
+                    return $q->where('assigned_user_id', $user->id);
+                })
+                ->whereDate('due_date', today())
+                ->where('status', '!=', 'completed')
+                ->count();
+            // ✅ PERFORMANCE: Calculate priority breakdown (NO CACHE - fresh)
+            $projectsByPriority = [
+                'critical' => Project::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('manager_id', $user->id); })->where('priority', 'critical')->count(),
+                'high' => Project::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('manager_id', $user->id); })->where('priority', 'high')->count(),
+                'medium' => Project::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('manager_id', $user->id); })->where('priority', 'medium')->count(),
+                'low' => Project::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('manager_id', $user->id); })->where('priority', 'low')->count(),
+            ];
+            
+            $tasksByPriority = [
+                'critical' => Task::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('assigned_user_id', $user->id); })->where('priority', 'critical')->count(),
+                'high' => Task::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('assigned_user_id', $user->id); })->where('priority', 'high')->count(),
+                'medium' => Task::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('assigned_user_id', $user->id); })->where('priority', 'medium')->count(),
+                'low' => Task::query()->when(!$user->isAdmin(), function($q) use ($user) { return $q->where('assigned_user_id', $user->id); })->where('priority', 'low')->count(),
+            ];
 
             // ✅ PERFORMANCE: Eager load activities with limit to prevent huge result sets
             $recentActivities = TaskActivity::select(['id', 'task_id', 'user_id', 'activity_type', 'created_at'])
