@@ -55,14 +55,19 @@ class HomeController extends Controller
             // ========== STRUCTURAL HIGHLIGHTS ==========
             // 3 Most Recently Updated Projects
             $recentProjects = Cache::remember($cacheKeyPrefix . '_recent_projects', $cacheTTL, function () use ($user) {
-                return Project::with(['manager:id,name', 'tasks:id,project_id,status'])
-                    ->where('manager_id', $user->id)
-                    ->orWhereHas('tasks', function ($q) use ($user) {
-                        $q->where('assigned_user_id', $user->id)
-                          ->orWhere('created_by', $user->id);
-                    })
-                    ->orderBy('updated_at', 'desc')
-                    ->limit(3)
+                $query = Project::with(['manager:id,name', 'tasks:id,project_id,status'])
+                    ->orderBy('updated_at', 'desc');
+
+                // Admins see all projects; others see only managed or related projects
+                $query->when(! $user->isAdmin(), function ($q) use ($user) {
+                    $q->where('manager_id', $user->id)
+                      ->orWhereHas('tasks', function ($q2) use ($user) {
+                          $q2->where('assigned_user_id', $user->id)
+                             ->orWhere('created_by', $user->id);
+                      });
+                });
+
+                return $query->limit(3)
                     ->get()
                     ->map(function ($project) {
                         $stats = [
@@ -90,14 +95,19 @@ class HomeController extends Controller
             // ========== UPCOMING TASKS FOR USER ==========
             // 5 Upcoming Tasks assigned to or created by user
             $upcomingTasks = Cache::remember($cacheKeyPrefix . '_upcoming_tasks', $cacheTTL, function () use ($user) {
-                return Task::with(['project:id,name', 'assignedUser:id,name', 'creator:id,name'])
-                    ->where(function ($q) use ($user) {
-                        $q->where('assigned_user_id', $user->id)
-                          ->orWhere('created_by', $user->id);
-                    })
+                $query = Task::with(['project:id,name', 'assignedUser:id,name', 'creator:id,name'])
                     ->whereIn('status', ['pending', 'in_progress'])
-                    ->orderBy('due_date', 'asc')
-                    ->limit(5)
+                    ->orderBy('due_date', 'asc');
+
+                // Restrict to user's tasks unless admin
+                $query->when(! $user->isAdmin(), function ($q) use ($user) {
+                    $q->where(function ($q2) use ($user) {
+                        $q2->where('assigned_user_id', $user->id)
+                           ->orWhere('created_by', $user->id);
+                    });
+                });
+
+                return $query->limit(5)
                     ->get()
                     ->map(function ($task) {
                         return [
@@ -115,14 +125,12 @@ class HomeController extends Controller
             });
 
             // ========== QUICK STATS ==========
+            // Quick stats — admins see global counts
             $quickStats = [
-                'total_projects' => Project::where('manager_id', $user->id)->count(),
-                'active_projects' => Project::where('manager_id', $user->id)->where('status', 'active')->count(),
-                'assigned_tasks' => Task::where('assigned_user_id', $user->id)->whereIn('status', ['pending', 'in_progress'])->count(),
-                'completed_today' => Task::where('assigned_user_id', $user->id)
-                    ->where('status', 'completed')
-                    ->whereDate('updated_at', today())
-                    ->count(),
+                'total_projects' => Project::query()->when(! $user->isAdmin(), function ($q) use ($user) { $q->where('manager_id', $user->id); })->count(),
+                'active_projects' => Project::query()->when(! $user->isAdmin(), function ($q) use ($user) { $q->where('manager_id', $user->id); })->where('status', 'active')->count(),
+                'assigned_tasks' => Task::query()->when(! $user->isAdmin(), function ($q) use ($user) { $q->where('assigned_user_id', $user->id); })->whereIn('status', ['pending', 'in_progress'])->count(),
+                'completed_today' => Task::query()->when(! $user->isAdmin(), function ($q) use ($user) { $q->where('assigned_user_id', $user->id); })->where('status', 'completed')->whereDate('updated_at', today())->count(),
             ];
 
             return view('home', [
