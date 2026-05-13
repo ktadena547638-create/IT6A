@@ -44,17 +44,6 @@ class DashboardController extends Controller
             Cache::forget($cacheKeyPrefix . '_due_today');
             Cache::forget($cacheKeyPrefix . '_projects_priority_breakdown');
             Cache::forget($cacheKeyPrefix . '_tasks_priority_breakdown');
-            // Debug logging to help diagnose missing projects in production
-            try {
-                Log::info('Dashboard debug counts', [
-                    'auth_user_id' => $user->id ?? null,
-                    'auth_user_role' => $user->role ?? null,
-                    'total_projects' => Project::count(),
-                    'sample_projects' => Project::select('id','name','manager_id')->limit(5)->get()->toArray(),
-                ]);
-            } catch (Exception $e) {
-                Log::warning('Dashboard debug logging failed: ' . $e->getMessage());
-            }
             
             $cacheTTL = now()->addMinutes(5); // 5-minute TTL
 

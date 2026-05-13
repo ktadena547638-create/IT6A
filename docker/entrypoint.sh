@@ -52,7 +52,11 @@ done
 
 echo "[BOOT] ✓ Migrations complete"
 echo "[BOOT] ✓ Ensuring demo login users exist..."
-php artisan db:seed --class=DemoLoginSeeder --force
+if [ "${SEED_ON_BOOT:-false}" = "true" ] || [ "${APP_ENV:-}" = "local" ] || [ "${APP_ENV:-}" = "development" ]; then
+    php artisan db:seed --class=DemoLoginSeeder --force
+else
+    echo "[BOOT] Skipping DemoLoginSeeder (SEED_ON_BOOT not enabled and APP_ENV is not local/development)"
+fi
 echo "[BOOT] ✓ Caching routes..."
 php artisan view:cache
 
