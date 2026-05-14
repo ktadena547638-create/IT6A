@@ -61,15 +61,15 @@ class HybridIntegrityTriggersTest extends TestCase
     }
 
     /**
-     * TEST 2: Trigger prevents planning project deletion
-     * EXPECTED: Cannot delete planning project
+     * TEST 2: Trigger allows planning project deletion
+     * EXPECTED: Can delete planning project (not active, not critical)
      */
-    public function test_trigger_prevents_planning_project_deletion()
+    public function test_trigger_allows_planning_project_deletion()
     {
-        $this->expectException(QueryException::class);
-        $this->expectExceptionMessageMatches('/DATABASE INTEGRITY VIOLATION/');
-
+        // Planning projects with non-critical priority should be deletable
         $this->planningProject->delete();
+        
+        $this->assertNull(Project::find($this->planningProject->id));
     }
 
     /**

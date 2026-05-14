@@ -15,7 +15,11 @@ class DatabaseIntegrityTest extends TestCase
 
     public function test_cascade_delete_project_deletes_tasks()
     {
-        $project = Project::factory()->create();
+        // Create a project with non-active status and non-critical priority (must be deletable per trigger)
+        $project = Project::factory()->create([
+            'status' => 'cancelled',  // Must not be 'active' to allow deletion
+            'priority' => 'low'        // Must not be 'critical' to allow deletion
+        ]);
         Task::factory(5)->create(['project_id' => $project->id]);
 
         $this->assertCount(5, Task::where('project_id', $project->id)->get());

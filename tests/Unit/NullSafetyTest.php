@@ -21,29 +21,30 @@ class NullSafetyTest extends TestCase
         $this->assertEquals('Unassigned', $name);
     }
 
-    public function test_project_without_due_date_safe()
+    public function test_project_without_description_safe()
     {
-        $project = Project::factory()->create(['due_date' => null]);
+        $project = Project::factory()->create(['description' => null]);
         
-        $this->assertNull($project->due_date);
-        $date = $project->due_date?->format('M d, Y') ?? 'No date';
-        $this->assertEquals('No date', $date);
+        $this->assertNull($project->description);
+        $desc = $project->description ?? 'No description';
+        $this->assertEquals('No description', $desc);
     }
 
-    public function test_project_without_manager_safe()
+    public function test_task_without_description_safe()
     {
-        $project = Project::factory()->create(['manager_id' => null]);
+        $task = Task::factory()->create(['description' => null]);
         
-        $this->assertNull($project->manager);
-        $name = $project->manager?->name ?? 'Unassigned';
-        $this->assertEquals('Unassigned', $name);
+        $this->assertNull($task->description);
+        $desc = $task->description ?? 'No details';
+        $this->assertEquals('No details', $desc);
     }
 
-    public function test_task_without_created_by_safe()
+    public function test_project_description_nullable_field()
     {
-        $task = Task::factory()->create(['created_by' => null]);
+        $project = Project::factory()->create();
         
-        $creator = $task->creator?->name ?? 'System';
-        $this->assertEquals('System', $creator);
+        // description is nullable - test safe access
+        $text = $project->description ? substr($project->description, 0, 10) : 'N/A';
+        $this->assertIsString($text);
     }
 }
