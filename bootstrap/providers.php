@@ -7,3 +7,4 @@ return [
     AppServiceProvider::class,
     EventServiceProvider::class,
 ];
+

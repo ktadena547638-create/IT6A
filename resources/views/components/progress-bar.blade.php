@@ -13,3 +13,4 @@ $color = !empty($color) ? $color : 'bg-indigo-600';
     </div>
     <span class="text-sm font-medium text-slate-600 min-w-12 text-right">{{ round($percentage) }}%</span>
 </div>
+

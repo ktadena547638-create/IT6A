@@ -25,3 +25,4 @@ class AuthorizeProjectAccess
         return $next($request);
     }
 }
+

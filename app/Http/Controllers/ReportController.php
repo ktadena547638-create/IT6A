@@ -98,3 +98,4 @@ class ReportController extends Controller
         return view('reports.activities', compact('activities'));
     }
 }
+

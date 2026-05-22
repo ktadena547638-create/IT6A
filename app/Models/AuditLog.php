@@ -68,3 +68,4 @@ class AuditLog extends Model
         return implode(', ', array_slice($changes, 0, 2));
     }
 }
+

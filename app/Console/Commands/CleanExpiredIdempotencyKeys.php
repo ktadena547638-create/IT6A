@@ -21,3 +21,4 @@ class CleanExpiredIdempotencyKeys extends Command
         return 0;
     }
 }
+

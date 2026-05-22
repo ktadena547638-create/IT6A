@@ -99,3 +99,4 @@ if ($failed === 0) {
     echo $colors['fail'] . "🔴 ISSUES FOUND - Review before Phase 4" . $colors['reset'] . "\n\n";
     exit(1);
 }
+

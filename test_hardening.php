@@ -142,3 +142,4 @@ echo "   • Transactions on all create/update\n";
 echo "   • Rate limiting on search & comments\n";
 echo "   • Cache working for KPI cards\n";
 echo "\n📊 Visit: http://127.0.0.1:8000\n";
+

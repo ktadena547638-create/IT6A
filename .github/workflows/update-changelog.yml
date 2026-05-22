@@ -11,3 +11,4 @@ jobs:
     permissions:
       contents: write
     uses: laravel/.github/.github/workflows/update-changelog.yml@main
+

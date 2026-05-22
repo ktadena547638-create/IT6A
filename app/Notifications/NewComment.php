@@ -67,3 +67,4 @@ class NewComment extends Notification implements ShouldQueue
         ];
     }
 }
+

@@ -150,3 +150,4 @@ function kanbanBoard() {
 }
 </script>
 @endsection
+

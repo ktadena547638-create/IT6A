@@ -128,3 +128,4 @@ class Project extends Model
         return $completedTasks > 0 ? (int) (($completedTasks / $totalTasks) * 100) : 0;
     }
 }
+

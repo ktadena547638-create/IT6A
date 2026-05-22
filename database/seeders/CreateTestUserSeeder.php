@@ -51,3 +51,4 @@ class CreateTestUserSeeder extends Seeder
         $this->command->info('   Team: team@test.com / password');
     }
 }
+

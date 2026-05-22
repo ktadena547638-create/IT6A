@@ -53,3 +53,4 @@ class TaskCommentPolicy
         return $user->isAdmin() || $user->id === $comment->user_id;
     }
 }
+

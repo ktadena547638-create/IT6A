@@ -30,3 +30,4 @@ class SendProjectMilestoneNotification implements ShouldQueue
         }
     }
 }
+

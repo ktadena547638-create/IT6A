@@ -35,3 +35,4 @@ $config = $priorityConfig[$priority] ?? $priorityConfig['low'];
     <span class="{{ $config['color'] }} font-bold text-sm">{{ $config['icon'] }}</span>
     <span class="{{ $config['color'] }} text-xs font-medium">{{ $config['label'] }}</span>
 </div>
+

@@ -57,3 +57,4 @@ class AuditLogger
         return $changes;
     }
 }
+

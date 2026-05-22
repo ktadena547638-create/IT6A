@@ -207,3 +207,4 @@ echo "\n";
 
 // Exit with success if all pass
 exit($failures === 0 ? 0 : 1);
+

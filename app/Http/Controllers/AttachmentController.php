@@ -99,3 +99,4 @@ class AttachmentController extends Controller
         return redirect()->route('tasks.show', $task)->with('success', 'File deleted successfully.');
     }
 }
+

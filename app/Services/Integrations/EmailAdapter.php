@@ -40,3 +40,4 @@ class EmailAdapter
         return config('mail.default') !== null;
     }
 }
+

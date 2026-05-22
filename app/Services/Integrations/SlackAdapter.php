@@ -79,3 +79,4 @@ class SlackAdapter
         return !empty($this->webhookUrl);
     }
 }
+

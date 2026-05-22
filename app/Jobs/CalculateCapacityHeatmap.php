@@ -74,3 +74,4 @@ class CalculateCapacityHeatmap implements ShouldQueue
         return $heatmap;
     }
 }
+

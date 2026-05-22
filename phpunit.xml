@@ -38,3 +38,4 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
 </phpunit>
+

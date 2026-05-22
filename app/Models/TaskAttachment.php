@@ -76,3 +76,4 @@ class TaskAttachment extends Model
         return round($size, 2) . ' ' . ($units[$i] ?? 'B');
     }
 }
+

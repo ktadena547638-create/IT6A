@@ -45,3 +45,4 @@ function updateTaskStatus(taskId, status) {
     .catch(error => console.error('Error:', error));
 }
 </script>
+

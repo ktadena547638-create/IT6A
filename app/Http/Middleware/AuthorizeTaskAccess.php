@@ -31,3 +31,4 @@ class AuthorizeTaskAccess
         return $next($request);
     }
 }
+

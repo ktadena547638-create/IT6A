@@ -115,3 +115,4 @@ class User extends Authenticatable
         return $this->hasMany(Task::class, 'assigned_user_id', 'id');
     }
 }
+

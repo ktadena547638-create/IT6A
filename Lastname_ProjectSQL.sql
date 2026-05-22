@@ -190,3 +190,4 @@ CALL sp_complete_task(1, 1);
 -- The first view gives a project summary with task counts, completed work, and overdue tasks.
 -- The second view filters the data to active projects only for quick reporting.
 -- Three stored procedures are included for showing summaries, filtering tasks by project, and completing a task while logging activity.
+

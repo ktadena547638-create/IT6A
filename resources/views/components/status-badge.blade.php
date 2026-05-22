@@ -26,3 +26,4 @@ if (empty($status)) {
 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusClasses[$status] ?? 'bg-gray-100 text-gray-800 border-gray-300' }}">
     {{ $displayStatus[$status] ?? ucfirst(str_replace('_', ' ', $status)) }}
 </span>
+

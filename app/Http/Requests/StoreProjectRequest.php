@@ -76,3 +76,4 @@ class StoreProjectRequest extends FormRequest
         ];
     }
 }
+

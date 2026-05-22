@@ -84,3 +84,4 @@ class GoogleCalendarAdapter
         return !empty($this->clientId) && !empty($this->refreshToken);
     }
 }
+

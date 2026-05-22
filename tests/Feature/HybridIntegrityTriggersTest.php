@@ -256,3 +256,4 @@ class HybridIntegrityTriggersTest extends TestCase
         parent::tearDown();
     }
 }
+
