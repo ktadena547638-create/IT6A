@@ -1,3 +1,12 @@
+# TaskFlow Documentation
+
+## Project Summary
+TaskFlow is a Laravel based task and project management platform built for collaboration, workflow tracking, auditability, and operational performance. The main implementation goals are separation of concerns, transactional safety, policy based authorization, queued background processing, and responsive user experiences.
+
+The codebase centers on users, projects, tasks, comments, attachments, and task activity records. Controllers handle HTTP concerns, services manage business rules, observers capture lifecycle events, and queued jobs handle blocking side effects. Performance work focuses on eager loading, composite indexes, caching, and avoiding unnecessary request blocking.
+
+## Release Notes
+
 # Release Notes
 
 ## [Unreleased](https://github.com/laravel/laravel/compare/v12.12.1...12.x)
