@@ -234,6 +234,78 @@ npm install && npm run build
 php artisan view:clear
 ```
 
+---
+
+## 📌 Quick Reference
+
+### Core Model Relationships
+- User manages many projects
+- Project has many tasks
+- Task belongs to one project
+- Task can be assigned to one user
+- Task has many comments and attachments
+- Task has many activity records
+
+### Common Service Calls
+```php
+$task = app(\App\Services\TaskService::class)->createTask($data);
+$tasks = app(\App\Services\TaskService::class)->getProjectTasks($projectId);
+$stats = app(\App\Services\TaskService::class)->getProjectTaskStats($projectId);
+```
+
+### Frequent Checks
+```php
+auth()->user()->can('update', $task);
+$task->isOverdue();
+$task->loadAllRelationships();
+```
+
+### Common Validation Targets
+- Task title, due date, priority, and project assignment
+- Project name, due date, manager assignment, and status
+- Comment content and attachment type or size
+
+---
+
+## 🧪 Testing Quick Guide
+
+### Run the Main Test Suite
+```bash
+php artisan test
+```
+
+### High Value Checks
+- Create, update, and delete a task to confirm transaction safety
+- Load the dashboard twice to confirm cache behavior
+- Assign a task and verify the notification queue is used
+- Submit an invalid request to confirm validation and error handling
+- Test a restricted action to confirm policy enforcement
+
+### Useful Debug Commands
+```bash
+php artisan tinker
+php artisan queue:listen
+tail -f storage/logs/laravel.log
+```
+
+---
+
+## 🚀 Phase 5 Setup Snapshot
+
+### Common Setup Steps
+```bash
+php artisan migrate
+php artisan storage:link
+php artisan config:cache
+php artisan route:cache
+```
+
+### Verify Core Features
+- Notifications dispatch asynchronously
+- Attachments upload and download correctly
+- Analytics pages load with cached metrics
+- Search returns projects and tasks after a short query
+
 ### Lab Environment Notes
 
 - **Firewall**: Ensure ports 8000 (Laravel), 3000 (Vite dev) are accessible

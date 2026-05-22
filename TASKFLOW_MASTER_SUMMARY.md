@@ -25,7 +25,7 @@ The following categories have been folded into this master summary:
 project status notes, deployment readiness reports, audit reports, completion reports, hardening summaries, improvement summaries, verification notes, and phase status documents.
 
 ## Recommended Core References To Keep
-The most useful surviving documents are the project README files, deployment guides, testing guides, setup guides, the dissertation file, and the thesis text file.
+The most useful surviving documents are `README.md`, `CHANGELOG.md`, `TASKFLOW_MASTER_SUMMARY.md`, and the thesis text file `text`.
 
 ## Thesis Summary
 The thesis explains the institutional context, workflow orchestration, problem analysis, solution architecture, objectives, scope, and conceptual model of TaskFlow. It is the primary narrative document for the project.
