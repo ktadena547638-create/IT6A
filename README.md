@@ -13,6 +13,12 @@
 
 TaskFlow is a comprehensive task management system designed for team collaboration, project planning, and real-time productivity tracking. Built with **Laravel 11**, **Tailwind CSS**, and **Alpine.js**, it delivers a fast, intuitive experience optimized for modern workflows.
 
+## 📋 Project Summary
+
+TaskFlow combines a layered Laravel architecture with normalized data design, policy based authorization, queued background processing, and performance tuning through eager loading, composite indexes, and caching. The system is built to preserve transactional safety, support task and project orchestration, and keep user facing operations within an interactive response window.
+
+The core data model centers on users, projects, tasks, comments, attachments, and task activity records. Controllers remain focused on HTTP concerns, services handle business rules, observers capture lifecycle events, and queued jobs handle blocking side effects. The design goal is separation of concerns with predictable performance and auditable state changes.
+
 ### Core Features
 
 - **Role-Based Access Control (RBAC)**: Admin → Project Manager → Team Member → Client (4-tier hierarchy)
